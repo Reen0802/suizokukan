@@ -2,2212 +2,1984 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
     <title>Aqzoo | 推しを毎月応援できるアプリ</title>
     <meta
       name="description"
-      content="Aqzooの推し動物応援アプリ。応援プラン、活動レポート、イベント、会員証を1つのHTMLで体験できます。"
+      content="Aqzooの日本語モバイルアプリ。推しの生き物を応援し、活動レポートや会員証、イベントまで体験できます。"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&family=Shippori+Mincho:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"M PLUS 1p"', '"Noto Sans JP"', "sans-serif"],
+              display: ['"Shippori Mincho"', '"Noto Serif JP"', "serif"],
+            },
+            boxShadow: {
+              aqua: "0 24px 70px rgba(15, 23, 42, 0.14)",
+            },
+          },
+        },
+      };
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.3.1?dev",
+          "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime?dev",
+          "react/jsx-dev-runtime": "https://esm.sh/react@18.3.1/jsx-dev-runtime?dev",
+          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?dev",
+          "framer-motion": "https://esm.sh/framer-motion@11.18.2?dev&external=react,react-dom",
+          "lucide-react": "https://esm.sh/lucide-react@0.511.0?dev&external=react"
+        }
+      }
+    </script>
     <style>
-      :root {
-        --bg-top: #031224;
-        --bg-mid: #063053;
-        --bg-bottom: #0a5a7e;
-        --panel: rgba(7, 28, 49, 0.78);
-        --panel-strong: rgba(10, 21, 36, 0.92);
-        --panel-soft: rgba(255, 255, 255, 0.1);
-        --text: #ebf7ff;
-        --muted: #9cc2da;
-        --line: rgba(255, 255, 255, 0.12);
-        --blue: #44baf2;
-        --blue-deep: #0f7ed1;
-        --mint: #62f5db;
-        --gold: #ffd36b;
-        --danger: #ff8b7f;
-        --shadow: 0 26px 60px rgba(0, 0, 0, 0.28);
-        --radius-xl: 28px;
-        --radius-lg: 20px;
-        --radius-md: 16px;
-        --radius-sm: 12px;
-        --phone-width: 390px;
-        --phone-height: 840px;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        margin: 0;
-        min-height: 100%;
-      }
-
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
-          "Yu Gothic", sans-serif;
-        color: var(--text);
-        background:
-          radial-gradient(circle at top, rgba(115, 216, 255, 0.18), transparent 24%),
-          radial-gradient(circle at 20% 20%, rgba(72, 182, 255, 0.18), transparent 28%),
-          linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
-        overflow-x: hidden;
-      }
-
-      body::before,
-      body::after {
-        content: "";
-        position: fixed;
-        inset: auto auto 8% -8%;
-        width: 320px;
-        height: 320px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(98, 245, 219, 0.16), transparent 62%);
-        filter: blur(18px);
-        pointer-events: none;
-      }
-
-      body::after {
-        inset: 12% -6% auto auto;
-        width: 380px;
-        height: 380px;
-        background: radial-gradient(circle, rgba(68, 186, 242, 0.18), transparent 64%);
-      }
-
-      .ocean-layer,
-      .ocean-layer::before,
-      .ocean-layer::after {
-        position: fixed;
-        left: 0;
-        right: 0;
-        pointer-events: none;
-      }
-
-      .ocean-layer {
-        top: 0;
-        height: 140px;
-        background:
-          linear-gradient(180deg, rgba(113, 220, 255, 0.26), transparent),
-          radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.18), transparent 30%);
-        opacity: 0.9;
-      }
-
-      .ocean-layer::before,
-      .ocean-layer::after {
-        content: "";
-        top: 0;
-        height: 100%;
-        background-repeat: repeat-x;
-        background-size: 240px 80px;
-        animation: wave 14s linear infinite;
-      }
-
-      .ocean-layer::before {
-        background-image:
-          radial-gradient(circle at 40px 45px, rgba(255, 255, 255, 0.18) 0 26px, transparent 27px),
-          radial-gradient(circle at 140px 30px, rgba(255, 255, 255, 0.14) 0 20px, transparent 21px);
-        opacity: 0.34;
-      }
-
-      .ocean-layer::after {
-        background-image:
-          radial-gradient(circle at 60px 54px, rgba(255, 255, 255, 0.1) 0 22px, transparent 23px),
-          radial-gradient(circle at 190px 18px, rgba(255, 255, 255, 0.12) 0 16px, transparent 17px);
-        animation-duration: 20s;
-        animation-direction: reverse;
-        opacity: 0.28;
-      }
-
-      .bubble-field {
-        position: fixed;
-        inset: 0;
-        overflow: hidden;
-        pointer-events: none;
-      }
-
-      .bubble {
-        position: absolute;
-        bottom: -80px;
-        width: var(--size);
-        height: var(--size);
-        left: var(--left);
-        border-radius: 50%;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.32), transparent 58%);
-        opacity: 0;
-        animation: bubble var(--duration) linear infinite;
-        animation-delay: var(--delay);
-      }
-
-      #app {
-        position: relative;
-        z-index: 1;
-      }
-
-      .shell {
-        width: min(1220px, calc(100vw - 32px));
-        margin: 28px auto;
-        display: grid;
-        grid-template-columns: minmax(0, 1.15fr) minmax(360px, 430px);
-        gap: 24px;
-        align-items: start;
-      }
-
-      .panel {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(16px);
-      }
-
-      .desktop {
-        padding: 26px;
-        min-height: calc(var(--phone-height) + 20px);
-        display: grid;
-        grid-template-rows: auto auto 1fr;
-        gap: 18px;
-      }
-
-      .desktop-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .brand-mark,
-      .mini-mark,
-      .nav-icon,
-      .shortcut-icon,
-      .section-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        font-weight: 700;
-      }
-
-      .brand-mark {
-        width: 44px;
-        height: 44px;
-        background: linear-gradient(135deg, #8fe8ff, #0f8fe3);
-        color: #042540;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-      }
-
-      .brand h1,
-      .phone-brand h2,
-      .section-title {
-        margin: 0;
-      }
-
-      .brand h1 {
-        font-size: 22px;
-        letter-spacing: 0.02em;
-      }
-
-      .brand p,
-      .mini-copy,
-      .kicker,
-      .report-meta,
-      .animal-meta,
-      .event-meta,
-      .rank-caption,
-      .notice-meta,
-      .support-meta,
-      .detail-summary,
-      .fact-label,
-      .progress-meta,
-      .empty-text {
-        margin: 0;
-        color: var(--muted);
-      }
-
-      .brand p,
-      .mini-copy,
-      .rank-caption,
-      .empty-text {
-        font-size: 13px;
-      }
-
-      .mini-badge {
-        padding: 10px 14px;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text);
-        font-size: 12px;
-        white-space: nowrap;
-      }
-
-      .hero {
-        position: relative;
-        overflow: hidden;
-        padding: 28px;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
-          var(--hero-gradient);
-        border-radius: 26px;
-        min-height: 290px;
-      }
-
-      .hero::before,
-      .hero::after {
-        content: "";
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.08);
-        filter: blur(2px);
-      }
-
-      .hero::before {
-        width: 280px;
-        height: 280px;
-        right: -60px;
-        top: -80px;
-      }
-
-      .hero::after {
-        width: 180px;
-        height: 180px;
-        left: -40px;
-        bottom: -80px;
-        background: rgba(98, 245, 219, 0.08);
-      }
-
-      .hero-layout {
-        position: relative;
-        z-index: 1;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 240px;
-        gap: 20px;
-        align-items: end;
-      }
-
-      .hero-copy {
-        display: grid;
-        gap: 14px;
-      }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        width: fit-content;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.12);
-        font-size: 12px;
-        letter-spacing: 0.08em;
-      }
-
-      .hero h3 {
-        margin: 0;
-        font-size: clamp(30px, 4vw, 48px);
-        line-height: 1.15;
-      }
-
-      .hero p {
-        margin: 0;
-        max-width: 560px;
-        color: #d9f4ff;
-        line-height: 1.8;
-      }
-
-      .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .button,
-      .ghost-button,
-      .chip,
-      .plan,
-      .nav-item,
-      .animal-card,
-      .list-card,
-      .notice-item,
-      .report-item,
-      .event-item,
-      .rank-item,
-      .selector {
-        border: 0;
-        color: inherit;
-        font: inherit;
-      }
-
-      .button,
-      .ghost-button,
-      .selector {
-        cursor: pointer;
-      }
-
-      .button {
-        padding: 14px 18px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #7ee7ff, #168de7);
-        color: #042540;
-        font-weight: 800;
-        box-shadow: 0 14px 26px rgba(10, 136, 210, 0.26);
-      }
-
-      .ghost-button {
-        padding: 14px 18px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text);
-        font-weight: 700;
-      }
-
-      .hero-art {
-        position: relative;
-        min-height: 238px;
-        border-radius: 24px;
-        overflow: hidden;
-        background:
-          radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.16), transparent 24%),
-          radial-gradient(circle at 68% 30%, rgba(255, 255, 255, 0.14), transparent 26%),
-          linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.18));
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        display: flex;
-        align-items: end;
-        justify-content: space-between;
-        padding: 18px;
-      }
-
-      .creature {
-        position: absolute;
-        inset: auto auto 20px 18px;
-        width: 126px;
-        height: 168px;
-        border-radius: 48% 48% 44% 44%;
-        background: linear-gradient(180deg, #ffffff, #9ec7df 60%, #0f2336 100%);
-        box-shadow: inset 0 0 0 10px rgba(5, 16, 28, 0.28);
-        transform: rotate(-7deg);
-      }
-
-      .creature::before {
-        content: "";
-        position: absolute;
-        inset: 18px 34px 28px 34px;
-        border-radius: 40px;
-        background: linear-gradient(180deg, #11283a, #09131d);
-      }
-
-      .creature::after {
-        content: "";
-        position: absolute;
-        width: 26px;
-        height: 14px;
-        top: 54px;
-        right: 12px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #ffdf7d, #e18823);
-      }
-
-      .art-caption {
-        position: relative;
-        z-index: 1;
-        margin-left: auto;
-        text-align: right;
-        max-width: 140px;
-      }
-
-      .art-caption strong {
-        display: block;
-        font-size: 28px;
-        line-height: 1.1;
-      }
-
-      .desktop-grid {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 18px;
-        min-height: 0;
-      }
-
-      .stack {
-        display: grid;
-        gap: 18px;
-      }
-
-      .section-card,
-      .info-card {
-        padding: 20px;
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .section-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
-
-      .section-title {
-        font-size: 18px;
-      }
-
-      .section-icon {
-        width: 30px;
-        height: 30px;
-        background: rgba(126, 231, 255, 0.16);
-        color: #baf4ff;
-        font-size: 13px;
-      }
-
-      .selector-row,
-      .chip-row,
-      .shortcut-row,
-      .plan-list,
-      .facts,
-      .nav {
-        display: flex;
-        gap: 10px;
-      }
-
-      .selector-row,
-      .chip-row,
-      .shortcut-row {
-        flex-wrap: wrap;
-      }
-
-      .selector {
-        padding: 10px 14px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: var(--muted);
-        transition: 0.2s ease;
-      }
-
-      .selector.is-active,
-      .chip.is-active {
-        color: #042540;
-        background: linear-gradient(135deg, #7ee7ff, #4fb6f6);
-        border-color: transparent;
-      }
-
-      .animal-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .animal-card {
-        position: relative;
-        overflow: hidden;
-        padding: 14px;
-        min-height: 150px;
-        border-radius: 18px;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.08)),
-          var(--animal-gradient);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .animal-card.is-active {
-        outline: 2px solid rgba(126, 231, 255, 0.62);
-        transform: translateY(-2px);
-      }
-
-      .animal-card::after {
-        content: attr(data-mark);
-        position: absolute;
-        right: 10px;
-        bottom: -8px;
-        font-size: 64px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        color: rgba(255, 255, 255, 0.08);
-      }
-
-      .animal-card strong,
-      .report-item strong,
-      .event-item strong,
-      .notice-item strong,
-      .rank-item strong,
-      .support-confirm strong,
-      .membership-card strong {
-        display: block;
-      }
-
-      .animal-price {
-        margin-top: 8px;
-        font-size: 13px;
-        color: #dcf8ff;
-      }
-
-      .animal-badge {
-        display: inline-flex;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.12);
-        font-size: 11px;
-        margin-top: 10px;
-      }
-
-      .facts {
-        flex-wrap: wrap;
-      }
-
-      .fact {
-        min-width: calc(50% - 10px);
-        padding: 12px 14px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.04);
-      }
-
-      .fact-value {
-        margin-top: 6px;
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      .timeline,
-      .report-list,
-      .event-list,
-      .notice-list,
-      .ranking-list {
-        display: grid;
-        gap: 10px;
-      }
-
-      .list-card,
-      .report-item,
-      .event-item,
-      .notice-item,
-      .rank-item {
-        width: 100%;
-        padding: 14px;
-        text-align: left;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        cursor: pointer;
-      }
-
-      .list-card {
-        cursor: default;
-      }
-
-      .report-item.is-active,
-      .event-item.is-active,
-      .notice-item.is-active {
-        border-color: rgba(126, 231, 255, 0.34);
-        background: rgba(126, 231, 255, 0.1);
-      }
-
-      .meta-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
-
-      .kicker {
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .detail-summary {
-        line-height: 1.7;
-      }
-
-      .rank-item {
-        display: grid;
-        grid-template-columns: 32px 1fr auto;
-        align-items: center;
-        gap: 10px;
-        cursor: default;
-      }
-
-      .rank-number {
-        width: 32px;
-        height: 32px;
-        border-radius: 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 211, 107, 0.18);
-        color: #ffe6a8;
-        font-weight: 800;
-      }
-
-      .phone {
-        width: min(var(--phone-width), 100%);
-        min-height: var(--phone-height);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      .phone-header {
-        padding: 18px 18px 12px;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
-          rgba(4, 18, 34, 0.78);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .status-bar,
-      .phone-brand,
-      .report-topline,
-      .membership-top,
-      .member-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
-
-      .status-bar {
-        font-size: 12px;
-        color: var(--muted);
-        margin-bottom: 14px;
-      }
-
-      .phone-brand {
-        margin-bottom: 12px;
-      }
-
-      .mini-mark {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, #7ee7ff, #0f8fe3);
-        color: #042540;
-      }
-
-      .phone-brand h2 {
-        font-size: 20px;
-      }
-
-      .phone-brand p {
-        margin: 2px 0 0;
-        font-size: 12px;
-        color: var(--muted);
-      }
-
-      .phone-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 18px;
-        display: grid;
-        gap: 16px;
+      html {
         scroll-behavior: smooth;
       }
 
-      .phone-body::-webkit-scrollbar {
-        width: 8px;
+      :root {
+        --bg-top: #07192f;
+        --bg-bottom: #f4fbff;
+        --ink: #10233c;
+        --accent: #7ef1ff;
+        --accent-warm: #ffb37b;
       }
 
-      .phone-body::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 999px;
-      }
-
-      .mobile-hero {
-        padding: 20px;
-        border-radius: 24px;
+      body {
+        margin: 0;
+        min-height: 100vh;
         background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.08)),
-          var(--hero-gradient);
-        position: relative;
-        overflow: hidden;
+          radial-gradient(circle at top, rgba(126, 241, 255, 0.16), transparent 28%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(244, 251, 255, 0.98)),
+          var(--bg-bottom);
+        font-family: "M PLUS 1p", "Noto Sans JP", sans-serif;
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
       }
 
-      .mobile-hero::after {
-        content: "";
-        position: absolute;
-        right: -24px;
-        bottom: -34px;
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
+      #root {
+        min-height: 100vh;
       }
 
-      .mobile-hero strong {
-        font-size: 28px;
-        display: block;
-        margin: 8px 0 6px;
-      }
-
-      .stat-grid,
-      .benefit-grid,
-      .report-highlights,
-      .member-stats {
-        display: grid;
-        gap: 10px;
-      }
-
-      .stat-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .benefit-grid,
-      .report-highlights,
-      .member-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .stat-card,
-      .benefit-card,
-      .highlight-card,
-      .member-stat {
-        padding: 14px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .stat-value,
-      .member-value {
-        display: block;
-        margin-top: 8px;
-        font-size: 20px;
-        font-weight: 800;
-      }
-
-      .section-panel {
-        padding: 18px;
-        border-radius: 22px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .section-panel h3,
-      .detail-card h3,
-      .membership-card h3,
-      .support-confirm h3 {
-        margin: 0 0 10px;
-        font-size: 18px;
-      }
-
-      .shortcut-row {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .shortcut {
-        padding: 14px 10px;
-        border-radius: 20px;
-        text-align: center;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        cursor: pointer;
-      }
-
-      .shortcut-icon {
-        width: 40px;
-        height: 40px;
-        margin: 0 auto 10px;
-        background: rgba(126, 231, 255, 0.14);
-        color: #baf4ff;
-      }
-
-      .shortcut span {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-      }
-
-      .chip {
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--muted);
-        cursor: pointer;
-      }
-
-      .plan-list {
-        flex-direction: column;
-      }
-
-      .plan {
-        padding: 16px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .plan.is-active {
-        border-color: rgba(126, 231, 255, 0.38);
-        background: rgba(126, 231, 255, 0.12);
-      }
-
-      .plan-price {
-        font-size: 24px;
-        font-weight: 800;
-        margin-bottom: 8px;
-      }
-
-      .support-confirm,
-      .detail-card,
-      .membership-card {
-        padding: 18px;
-        border-radius: 22px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .support-confirm {
-        background: linear-gradient(180deg, rgba(98, 245, 219, 0.14), rgba(255, 255, 255, 0.04));
-      }
-
-      .support-badge {
-        display: inline-flex;
-        padding: 7px 12px;
-        border-radius: 999px;
-        background: rgba(98, 245, 219, 0.14);
-        color: #b9fff2;
-        font-size: 12px;
-        margin-bottom: 10px;
-      }
-
-      .membership-card {
-        background:
-          radial-gradient(circle at top right, rgba(126, 231, 255, 0.2), transparent 36%),
-          linear-gradient(160deg, rgba(17, 47, 76, 0.95), rgba(4, 20, 35, 0.95));
-      }
-
-      .member-id {
-        font-size: 12px;
-        color: #c9ebfb;
-      }
-
-      .qr {
-        width: 74px;
-        height: 74px;
-        border-radius: 14px;
-        background:
-          linear-gradient(90deg, #ffffff 10px, transparent 10px) 0 0 / 18px 18px,
-          linear-gradient(#ffffff 10px, transparent 10px) 0 0 / 18px 18px,
-          linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02));
-        border: 1px solid rgba(255, 255, 255, 0.22);
-      }
-
-      .progress-bar {
-        position: relative;
-        height: 10px;
-        border-radius: 999px;
-        overflow: hidden;
-        background: rgba(255, 255, 255, 0.08);
-      }
-
-      .progress-bar span {
-        display: block;
-        height: 100%;
-        width: var(--progress);
-        background: linear-gradient(135deg, #7ee7ff, #62f5db);
-      }
-
-      .nav {
-        padding: 12px 12px 14px;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(4, 16, 29, 0.88);
-        justify-content: space-between;
-      }
-
-      .nav-item {
-        flex: 1;
-        background: transparent;
-        border-radius: 18px;
-        color: var(--muted);
-        padding: 10px 6px;
-        display: grid;
-        justify-items: center;
-        gap: 8px;
-        cursor: pointer;
-      }
-
-      .nav-item.is-active {
-        background: rgba(126, 231, 255, 0.1);
-        color: var(--text);
-      }
-
-      .nav-icon {
-        width: 32px;
-        height: 32px;
-        background: rgba(255, 255, 255, 0.08);
-        font-size: 13px;
-      }
-
-      .nav-item.is-active .nav-icon {
-        background: linear-gradient(135deg, #7ee7ff, #1594e7);
-        color: #042540;
-      }
-
-      .nav-label {
-        font-size: 11px;
-        font-weight: 700;
-      }
-
-      .empty-text {
-        padding: 16px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px dashed rgba(255, 255, 255, 0.14);
-      }
-
-      @keyframes bubble {
-        0% {
-          transform: translate3d(0, 0, 0) scale(0.5);
-          opacity: 0;
-        }
-
-        18% {
-          opacity: 0.8;
-        }
-
-        100% {
-          transform: translate3d(24px, -110vh, 0) scale(1.16);
-          opacity: 0;
-        }
-      }
-
-      @keyframes wave {
+      @keyframes marquee {
         0% {
           transform: translateX(0);
         }
 
         100% {
-          transform: translateX(-240px);
+          transform: translateX(-50%);
         }
       }
 
-      @media (max-width: 1080px) {
-        .shell {
-          grid-template-columns: 1fr;
-          justify-items: center;
+      @keyframes floatY {
+        0%,
+        100% {
+          transform: translateY(0);
         }
 
-        .desktop {
-          min-height: auto;
-          width: min(840px, 100%);
-        }
-      }
-
-      @media (max-width: 720px) {
-        .shell {
-          width: calc(100vw - 18px);
-          margin: 10px auto 20px;
-          gap: 16px;
-        }
-
-        .desktop {
-          padding: 18px;
-        }
-
-        .desktop-top,
-        .hero-layout,
-        .desktop-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .hero-layout {
-          display: grid;
-        }
-
-        .animal-grid,
-        .benefit-grid,
-        .report-highlights,
-        .member-stats {
-          grid-template-columns: 1fr;
-        }
-
-        .shortcut-row {
-          grid-template-columns: 1fr;
-        }
-
-        .phone {
-          width: 100%;
-          min-height: auto;
-        }
-
-        .nav {
-          position: sticky;
-          bottom: 0;
+        50% {
+          transform: translateY(-12px);
         }
       }
     </style>
   </head>
   <body>
-    <div class="ocean-layer"></div>
-    <div class="bubble-field" aria-hidden="true">
-      <span class="bubble" style="--left: 7%; --size: 22px; --duration: 18s; --delay: 0s;"></span>
-      <span class="bubble" style="--left: 18%; --size: 14px; --duration: 14s; --delay: 6s;"></span>
-      <span class="bubble" style="--left: 34%; --size: 28px; --duration: 22s; --delay: 2s;"></span>
-      <span class="bubble" style="--left: 49%; --size: 18px; --duration: 17s; --delay: 9s;"></span>
-      <span class="bubble" style="--left: 63%; --size: 26px; --duration: 21s; --delay: 4s;"></span>
-      <span class="bubble" style="--left: 78%; --size: 16px; --duration: 15s; --delay: 1s;"></span>
-      <span class="bubble" style="--left: 88%; --size: 24px; --duration: 20s; --delay: 8s;"></span>
+    <div id="root"></div>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script
+      type="text/babel"
+      data-type="module"
+      data-presets="react"
+    >
+import React from "react";
+import { createRoot } from "react-dom/client";
+import {
+  Activity,
+  ArrowLeft,
+  BadgeCheck,
+  Bell,
+  CalendarDays,
+  Camera,
+  CheckCircle2,
+  ChevronRight,
+  CreditCard,
+  Crown,
+  FileText,
+  Heart,
+  Home,
+  Menu,
+  QrCode,
+  Search,
+  Sparkles,
+  Star,
+  Ticket,
+  Trophy,
+  User,
+} from "lucide-react";
+
+const animals = [
+  {
+    id: "penguin",
+    name: "ペンギン",
+    nickname: "ユキ",
+    location: "極地の海エリア",
+    price: 500,
+    badge: "人気の推し",
+
+    tones: "from-slate-950 via-sky-800 to-cyan-400",
+    facts: [
+      { label: "生息地", value: "南極・亜南極地域" },
+      { label: "食べもの", value: "魚・オキアミなど" },
+      { label: "体長", value: "約60〜90cm" },
+      { label: "性格", value: "好奇心旺盛で社交的" },
+    ],
+    summary:
+      "冷たい海を元気に泳ぎ回る人気者。毎日の体重や羽の状態を見守りながら、健康管理と環境整備を支えられます。",
+  },
+  {
+    id: "otter",
+    name: "ラッコ",
+    nickname: "モチ",
+    location: "海獣ひろば",
+    price: 800,
+    badge: "一緒に暮らす仲間たち",
+
+    tones: "from-[#0f2137] via-[#365d7d] to-[#8ed5de]",
+    facts: [
+      { label: "生息地", value: "北太平洋沿岸" },
+      { label: "食べもの", value: "貝・ウニ・甲殻類" },
+      { label: "体長", value: "約1.2m" },
+      { label: "性格", value: "繊細で遊び好き" },
+    ],
+    summary:
+      "海藻に包まれて浮かぶ姿が愛らしいラッコ。給餌や健康観察に加え、保全のための研究活動も応援できます。",
+  },
+  {
+    id: "dolphin",
+    name: "イルカ",
+    nickname: "ソラ",
+    location: "オーシャンスタジアム",
+    price: 1000,
+    badge: "知能の高い人気者",
+
+    tones: "from-[#072847] via-[#1b5ea8] to-[#67c9ff]",
+    facts: [
+      { label: "生息地", value: "温帯〜熱帯の沿岸" },
+      { label: "食べもの", value: "魚・イカ" },
+      { label: "体長", value: "約2〜3m" },
+      { label: "性格", value: "活発で学習能力が高い" },
+    ],
+    summary:
+      "群れでのコミュニケーションが得意なイルカ。トレーニングやエンリッチメントの様子をレポートで追いかけられます。",
+  },
+  {
+    id: "lion",
+    name: "ライオン",
+    nickname: "レオ",
+    location: "サバンナガーデン",
+    price: 1000,
+    badge: "堂々たる王者",
+
+    tones: "from-[#2f1606] via-[#8c4b16] to-[#f4be63]",
+    facts: [
+      { label: "生息地", value: "アフリカの草原" },
+      { label: "食べもの", value: "肉食" },
+      { label: "体長", value: "約1.8〜2.5m" },
+      { label: "性格", value: "落ち着きがあり勇敢" },
+    ],
+    summary:
+      "大きなたてがみが魅力のライオン。休息時間や群れでの行動を観察しながら、飼育環境の改善を後押しできます。",
+  },
+];
+
+const supportPlans = [
+  {
+    id: "starter",
+    amount: 500,
+    label: "500円 / 月",
+    title: "気軽に応援プラン",
+    perks: "毎月のレポート / 写真 / 会員証",
+    recommended: true,
+  },
+  {
+    id: "grow",
+    amount: 1000,
+    label: "1,000円 / 月",
+    title: "しっかり見守りプラン",
+    perks: "月次まとめ / 限定先行レポート / 応援コメント",
+  },
+  {
+    id: "impact",
+    amount: 3000,
+    label: "3,000円 / 月",
+    title: "特別サポータープラン",
+    perks: "限定イベント / バックヤード抽選 / 保全アップデート",
+  },
+];
+
+const homeBenefits = [
+  {
+    icon: Heart,
+    title: "月額500円から応援",
+    text: "気軽に始めて、毎月の継続支援につなげられます。",
+  },
+  {
+    icon: Camera,
+    title: "活動レポート",
+    text: "写真や近況メモで、毎日の変化を追いかけられます。",
+  },
+  {
+    icon: Ticket,
+    title: "会員特典",
+    text: "限定イベントや会員証で、現地体験も深まります。",
+  },
+];
+
+const reports = [
+  {
+    id: "report-1",
+    animalId: "penguin",
+    category: "写真",
+    date: "2026.05.01",
+    title: "ペンギンの体重チェックを行いました",
+    excerpt: "体重は先月比で安定。食欲もあり、羽の状態も良好でした。",
+    body:
+      "朝の健康チェックでは、体重・歩行・羽毛の状態を確認しました。給餌の反応も良く、泳ぎの姿勢も安定しています。夕方には氷のおもちゃに夢中になる様子も見られ、環境エンリッチメントの効果が出ています。",
+  },
+  {
+    id: "report-2",
+    animalId: "otter",
+    category: "記録",
+    date: "2026.04.15",
+    title: "朝の給餌を観察しました",
+    excerpt: "貝を上手に割って食べる様子と、水面でのリラックス行動を記録。",
+    body:
+      "ラッコのモチは朝の給餌でお気に入りの貝を選び、何度も回転しながら上手に割って食べていました。食後は海藻に包まれて休み、ストレス指標も安定しています。",
+  },
+  {
+    id: "report-3",
+    animalId: "dolphin",
+    category: "写真",
+    date: "2026.04.08",
+    title: "プール下の様子を観察しました",
+    excerpt: "仲間同士の追いかけっこが見られ、活発な一日でした。",
+    body:
+      "イルカたちは午前中から活発に泳ぎ、スタッフの合図に合わせて複数のターゲットトレーニングを成功させました。午後は群れでの遊泳が増え、観察日誌にも多くの記録が残りました。",
+  },
+  {
+    id: "report-4",
+    animalId: "penguin",
+    category: "お知らせ",
+    date: "2026.04.05",
+    title: "新しいおもちゃで遊びました",
+    excerpt: "好奇心いっぱいに氷のトンネルへ飛び込む姿が見られました。",
+    body:
+      "新しい氷のトンネルを設置したところ、ペンギンたちは入れ替わりで中を通り抜け、しばらく周囲を泳ぎ続けていました。行動バリエーションを増やす良いきっかけになっています。",
+  },
+  {
+    id: "report-5",
+    animalId: "lion",
+    category: "記録",
+    date: "2026.03.29",
+    title: "午後の休息行動を観察しました",
+    excerpt: "日陰でゆっくり過ごしながら、群れの位置関係を安定して保っていました。",
+    body:
+      "ライオンたちは気温の高い時間帯に木陰へ移動し、交代で周囲を見渡しながら落ち着いて休んでいました。水場への移動もスムーズで、群れとして安定した行動が見られています。",
+  },
+];
+
+const notifications = [
+  {
+    id: "notice-1",
+    kind: "お知らせ",
+    date: "2026.06.02",
+    title: "ペンギンの赤ちゃんが誕生しました",
+    excerpt: "記念フォトと飼育員コメントを公開しています。",
+    animalId: "penguin",
+    unread: true,
+  },
+  {
+    id: "notice-2",
+    kind: "イベント",
+    date: "2026.05.20",
+    title: "バックヤードツアーの募集を開始しました",
+    excerpt: "会員向け先行受付がスタートしました。",
+    animalId: "penguin",
+    unread: true,
+  },
+  {
+    id: "notice-3",
+    kind: "お知らせ",
+    date: "2026.05.01",
+    title: "限定イベントのお知らせ",
+    excerpt: "応援ランクに応じて参加できる限定企画です。",
+    animalId: "otter",
+    unread: false,
+  },
+  {
+    id: "notice-4",
+    kind: "メンテナンス",
+    date: "2026.04.23",
+    title: "メンテナンスに伴う一時停止のお知らせ",
+    excerpt: "6月20日 2:00〜4:00 は一部機能を停止します。",
+    animalId: "dolphin",
+    unread: false,
+  },
+];
+
+const rankingRows = {
+  "今月": [
+    { rank: 1, animalId: "penguin", value: "3,250,000円" },
+    { rank: 2, animalId: "otter", value: "2,180,000円" },
+    { rank: 3, animalId: "lion", value: "1,850,000円" },
+    { rank: 4, animalId: "dolphin", value: "1,620,000円" },
+  ],
+  "先月": [
+    { rank: 1, animalId: "otter", value: "2,960,000円" },
+    { rank: 2, animalId: "penguin", value: "2,520,000円" },
+    { rank: 3, animalId: "dolphin", value: "1,740,000円" },
+    { rank: 4, animalId: "lion", value: "1,430,000円" },
+  ],
+  "累計": [
+    { rank: 1, animalId: "penguin", value: "12,560,000円" },
+    { rank: 2, animalId: "otter", value: "10,120,000円" },
+    { rank: 3, animalId: "dolphin", value: "8,420,000円" },
+    { rank: 4, animalId: "lion", value: "7,860,000円" },
+  ],
+};
+
+const supporterVoices = [
+  {
+    id: "voice-1",
+    name: "ペンギンが元気に育ってくれて嬉しい！",
+    meta: "20代・女性",
+  },
+  {
+    id: "voice-2",
+    name: "ラッコの仕草にいつも癒やされています",
+    meta: "30代・男性",
+  },
+  {
+    id: "voice-3",
+    name: "家族で応援しています！ これからも楽しみ",
+    meta: "40代・夫婦",
+  },
+];
+
+const events = [
+  {
+    id: "event-1",
+    title: "バックヤードツアー",
+    date: "2026.07.12 (土) 10:00〜11:30",
+    place: "海獣エリア裏側",
+    capacity: "20名",
+    fee: "会員限定 無料",
+    animalId: "penguin",
+    summary:
+      "普段は入れない飼育エリアを案内。朝の準備や健康管理の様子を見学できます。",
+  },
+  {
+    id: "event-2",
+    title: "飼育員のお仕事体験",
+    date: "2026.07.20 (月) 13:00〜14:30",
+    place: "オーシャンスタジアム",
+    capacity: "10名",
+    fee: "2,000円",
+    animalId: "dolphin",
+    summary:
+      "トレーニング器具の紹介や給餌の準備を体験。子どもも参加しやすいプログラムです。",
+  },
+  {
+    id: "event-3",
+    title: "夜の水族館ウォッチング",
+    date: "2026.08.10 (土) 18:30〜20:00",
+    place: "メイン館内",
+    capacity: "30名",
+    fee: "1,500円",
+    animalId: "otter",
+    summary:
+      "夜ならではの落ち着いた表情や、眠る前の行動をゆっくり観察できます。",
+  },
+];
+
+const desktopFeatures = [
+  {
+    icon: CreditCard,
+    title: "会員証から現地体験まで一続き",
+    text: "オンライン支援と来園体験を同じ世界観でつなげています。",
+  },
+  {
+    icon: FileText,
+    title: "活動レポートで応援の意味が見える",
+    text: "健康記録や写真更新を一本のストーリーとして追えます。",
+  },
+  {
+    icon: Sparkles,
+    title: "継続したくなる軽やかな動線",
+    text: "支援、通知、ランキング、イベントまで自然につながります。",
+  },
+];
+
+const experienceFlow = [
+  "気になる生き物を見つける",
+  "詳細を読んで魅力を知る",
+  "プランを選んで応援する",
+  "活動レポートで成長を追う",
+  "会員証やイベントで関係を深める",
+];
+
+const tabItems = [
+  { key: "home", label: "ホーム", icon: Home },
+  { key: "discover", label: "さがす", icon: Search },
+  { key: "reports", label: "レポート", icon: Activity },
+  { key: "member", label: "会員証", icon: Ticket },
+  { key: "mypage", label: "マイページ", icon: User },
+];
+
+function classNames(...values) {
+  return values.filter(Boolean).join(" ");
+}
+
+function findAnimal(id) {
+  return animals.find((animal) => animal.id === id);
+}
+
+function formatImageUrl(animalId) {
+  const urls = {
+    penguin: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/iMxoACEWDIwJDZap.jpg",
+    otter: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/nxNgSWdlEwjUoHyb.jpg",
+    dolphin: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/lQIBXQWAeqilFEVm.jpg",
+    lion: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/mRuBUjzsnVydBUZm.jpg",
+  };
+  return urls[animalId];
+}
+
+function formatYen(value) {
+  return `${value.toLocaleString("ja-JP")}円`;
+}
+
+function ScreenBase({ children, className = "", bottomNav }) {
+  return (
+    <div className={classNames("relative h-full overflow-hidden", className)}>
+      <div
+        className={classNames(
+          "h-full overflow-y-auto px-4 pt-4",
+          bottomNav ? "pb-28" : "pb-8",
+        )}
+      >
+        {children}
+      </div>
+      {bottomNav}
     </div>
-    <div id="app"></div>
-    <script>
-      const aquariums = [
-        { id: "aqzoo", name: "Aqzoo 海のいのち館", city: "横浜", focus: "海獣と極地のいきもの" },
-        { id: "ocean", name: "ブルーリーフ水族園", city: "神戸", focus: "イルカと深海展示" },
-        { id: "wild", name: "サバンナリンク", city: "名古屋", focus: "陸の人気動物" },
-      ];
+  );
+}
 
-      const animals = [
-        {
-          id: "penguin",
-          name: "ペンギン",
-          nickname: "ユキ",
-          location: "極地の海エリア",
-          price: 500,
-          badge: "人気の推し",
-          mark: "P",
-          gradient: "linear-gradient(140deg, #0d1e32, #155b85 58%, #61d7ff)",
-          summary:
-            "ひんやりした海を元気に泳ぐ人気者。毎日の体重や羽の状態を見守りながら、健康管理と環境整備を応援できます。",
-          facts: [
-            { label: "生息地", value: "南極・亜南極地域" },
-            { label: "食べもの", value: "魚・オキアミ" },
-            { label: "体長", value: "約60〜90cm" },
-            { label: "性格", value: "好奇心旺盛で社交的" },
-          ],
-        },
-        {
-          id: "otter",
-          name: "ラッコ",
-          nickname: "モチ",
-          location: "海獣ひろば",
-          price: 800,
-          badge: "研究保全を応援",
-          mark: "O",
-          gradient: "linear-gradient(140deg, #10253d, #48647a 55%, #a9f0ef)",
-          summary:
-            "海藻に包まれて浮かぶ愛らしいラッコ。給餌や健康観察に加え、保全のための研究活動も支援できます。",
-          facts: [
-            { label: "生息地", value: "北太平洋沿岸" },
-            { label: "食べもの", value: "貝・ウニ・甲殻類" },
-            { label: "体長", value: "約1.2m" },
-            { label: "性格", value: "繊細で遊び好き" },
-          ],
-        },
-        {
-          id: "dolphin",
-          name: "イルカ",
-          nickname: "ソラ",
-          location: "オーシャンスタジアム",
-          price: 1000,
-          badge: "知能の高い人気者",
-          mark: "D",
-          gradient: "linear-gradient(140deg, #062849, #1a67a7 58%, #7dd9ff)",
-          summary:
-            "群れでのコミュニケーションが得意なイルカ。トレーニングやエンリッチメントの様子をレポートで追いかけられます。",
-          facts: [
-            { label: "生息地", value: "温帯〜熱帯の沿岸" },
-            { label: "食べもの", value: "魚・イカ" },
-            { label: "体長", value: "約2〜3m" },
-            { label: "性格", value: "活発で学習能力が高い" },
-          ],
-        },
-        {
-          id: "lion",
-          name: "ライオン",
-          nickname: "レオ",
-          location: "サバンナガーデン",
-          price: 1000,
-          badge: "堂々たる王者",
-          mark: "L",
-          gradient: "linear-gradient(140deg, #2d1607, #8c4a16 55%, #ffcf6a)",
-          summary:
-            "大きなたてがみが魅力のライオン。休息時間や群れでの行動を観察しながら、飼育環境の改善を後押しできます。",
-          facts: [
-            { label: "生息地", value: "アフリカの草原" },
-            { label: "食べもの", value: "肉食" },
-            { label: "体長", value: "約1.8〜2.5m" },
-            { label: "性格", value: "落ち着きがあり勇敢" },
-          ],
-        },
-        {
-          id: "seal",
-          name: "アザラシ",
-          nickname: "フク",
-          location: "寒流ドーム",
-          price: 800,
-          badge: "癒やし系スター",
-          mark: "S",
-          gradient: "linear-gradient(140deg, #24364d, #68839b 55%, #d5eef8)",
-          summary:
-            "ころんとした体で人気のアザラシ。食事量や遊具の工夫など、毎日の小さな変化を応援の力で支えられます。",
-          facts: [
-            { label: "生息地", value: "寒冷な海域" },
-            { label: "食べもの", value: "魚・甲殻類" },
-            { label: "体長", value: "約1.4〜1.8m" },
-            { label: "性格", value: "穏やかでマイペース" },
-          ],
-        },
-        {
-          id: "giraffe",
-          name: "キリン",
-          nickname: "ナツ",
-          location: "サファリエリア",
-          price: 1200,
-          badge: "背の高い人気者",
-          mark: "G",
-          gradient: "linear-gradient(140deg, #3e280d, #9a6e24 54%, #f6d88f)",
-          summary:
-            "長い首で高い枝葉を食べるキリン。足元のケアや展示環境づくりを、毎月の応援で継続的に支援できます。",
-          facts: [
-            { label: "生息地", value: "アフリカのサバンナ" },
-            { label: "食べもの", value: "木の葉・若枝" },
-            { label: "体長", value: "約4.5〜5.5m" },
-            { label: "性格", value: "穏やかで警戒心が強い" },
-          ],
-        },
-      ];
+function PhoneFrame({ children }) {
+  return (
+    <div className="w-full max-w-[408px] rounded-[44px] border border-white/40 bg-white/65 p-2 shadow-[0_40px_120px_rgba(6,24,46,0.18)] backdrop-blur md:p-3">
+      <div className="relative aspect-[390/844] overflow-hidden rounded-[34px] border border-white/70 bg-white">
+        {children}
+      </div>
+    </div>
+  );
+}
 
-      const plans = [
-        {
-          amount: 500,
-          title: "気軽に応援プラン",
-          description: "毎月の健康チェックと近況レポートを受け取れます。",
-        },
-        {
-          amount: 1000,
-          title: "しっかり見守りプラン",
-          description: "限定写真と月次レポート、イベント優先案内付きです。",
-        },
-        {
-          amount: 3000,
-          title: "特別サポータープラン",
-          description: "名入れサポーター証と季節の特別レポートを楽しめます。",
-        },
-      ];
+function StatusBar({ light = false }) {
+  return (
+    <div
+      className={classNames(
+        "flex items-center justify-between text-[11px] font-black",
+        light ? "text-slate-900" : "text-white",
+      )}
+    >
+      <span>9:41</span>
+      <div className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-current opacity-80" />
+        <span className="h-2 w-2 rounded-full bg-current opacity-80" />
+        <span className="rounded-full border border-current/40 px-1.5 py-0.5 text-[10px]">
+          100
+        </span>
+      </div>
+    </div>
+  );
+}
 
-      const reports = [
-        {
-          id: "rep-1",
-          animalId: "penguin",
-          title: "ペンギンの体重チェックを行いました",
-          date: "2026.06.18",
-          category: "health",
-          excerpt: "換羽前の体調管理として、体重と食欲の変化を細かく確認しました。",
-          detail:
-            "朝の給餌前に体重測定を実施し、先月比で安定していることを確認しました。応援費は水質維持と保温設備の点検にも活用されています。",
-        },
-        {
-          id: "rep-2",
-          animalId: "otter",
-          title: "貝割りトレーニングの様子を記録しました",
-          date: "2026.06.15",
-          category: "activity",
-          excerpt: "道具の使い方を促すエンリッチメントを導入しています。",
-          detail:
-            "新しい浮具を使った行動観察を行い、集中して遊ぶ時間が長くなりました。応援プランの一部は知育玩具の追加制作に使われています。",
-        },
-        {
-          id: "rep-3",
-          animalId: "dolphin",
-          title: "プールでの様子を観察しました",
-          date: "2026.06.12",
-          category: "photo",
-          excerpt: "群れの中でのコミュニケーションがとても活発でした。",
-          detail:
-            "午後のプログラム前に遊泳コースを変更し、より自然に近い動きが見られました。応援のおかげで観察カメラの保守も進んでいます。",
-        },
-        {
-          id: "rep-4",
-          animalId: "seal",
-          title: "新しいおもちゃで遊ぶ姿を確認しました",
-          date: "2026.06.08",
-          category: "activity",
-          excerpt: "運動量を増やすための浮遊玩具にしっかり反応しています。",
-          detail:
-            "水槽内での回遊回数が増え、午後の休息も安定していました。応援金は遊具更新と獣医チェック体制の拡充に役立っています。",
-        },
-        {
-          id: "rep-5",
-          animalId: "giraffe",
-          title: "ブラッシングと蹄の状態を確認しました",
-          date: "2026.06.03",
-          category: "health",
-          excerpt: "暑い時期に備えて、日陰エリアの環境調整も進めています。",
-          detail:
-            "足元の負担を減らすための床材調整を行いました。継続応援のおかげで、長期的なケア設備の更新計画が前倒しで進んでいます。",
-        },
-      ];
-
-      const notices = [
-        {
-          id: "notice-1",
-          title: "ペンギンの赤ちゃんが誕生しました",
-          date: "2026.06.20",
-          type: "お知らせ",
-          detail:
-            "極地エリアで新しいひなが誕生しました。限定レポートでは成長の様子を定期配信予定です。",
-        },
-        {
-          id: "notice-2",
-          title: "限定イベントの先行応募が始まりました",
-          date: "2026.06.16",
-          type: "イベント",
-          detail:
-            "バックヤードツアーの先行受付を開始しました。サポーター会員は一般募集より先に申し込みできます。",
-        },
-        {
-          id: "notice-3",
-          title: "会員証のデザインが新しくなりました",
-          date: "2026.06.10",
-          type: "メンバー",
-          detail:
-            "デジタル会員証に水槽テーマの背景とランク表示が追加されました。マイページからいつでも確認できます。",
-        },
-      ];
-
-      const events = [
-        {
-          id: "event-1",
-          title: "バックヤードツアー",
-          date: "2026.07.12",
-          time: "10:00 - 11:30",
-          capacity: "20名",
-          place: "Aqzoo 海のいのち館",
-          summary: "飼育スタッフが解説しながら、普段は入れない裏側をご案内します。",
-        },
-        {
-          id: "event-2",
-          title: "夜の水族館ウォッチング",
-          date: "2026.07.24",
-          time: "18:30 - 20:00",
-          capacity: "30名",
-          place: "ブルーリーフ水族園",
-          summary: "閉館後の静かな館内で、夜の行動をじっくり観察できる人気イベントです。",
-        },
-        {
-          id: "event-3",
-          title: "飼育員のお仕事体験",
-          date: "2026.08.02",
-          time: "13:00 - 15:00",
-          capacity: "12名",
-          place: "Aqzoo 海のいのち館",
-          summary: "エサ準備や展示の工夫を学びながら、いきものを支える仕事に触れられます。",
-        },
-      ];
-
-      const ranking = [
-        { animalId: "penguin", amount: 3250000 },
-        { animalId: "otter", amount: 2180000 },
-        { animalId: "lion", amount: 1850000 },
-        { animalId: "dolphin", amount: 1620000 },
-        { animalId: "giraffe", amount: 1120000 },
-      ];
-
-      const comments = [
-        "羽づくろいの様子が見られて毎回うれしいです。",
-        "元気に泳ぐ姿をこれからも見守りたいです。",
-        "研究や保全にもつながる応援なのがうれしいです。",
-      ];
-
-      const savedState = loadState();
-
-      const state = {
-        currentAquariumId: savedState.currentAquariumId || aquariums[0].id,
-        currentAnimalId: savedState.currentAnimalId || animals[0].id,
-        currentTab: savedState.currentTab || "home",
-        selectedPlanAmount: savedState.selectedPlanAmount || plans[0].amount,
-        reportFilter: savedState.reportFilter || "all",
-        currentReportId: savedState.currentReportId || reports[0].id,
-        currentEventId: savedState.currentEventId || events[0].id,
-        currentNoticeId: savedState.currentNoticeId || notices[0].id,
-        supports: Array.isArray(savedState.supports)
-          ? savedState.supports
-          : [{ animalId: "penguin", amount: 500, date: "2026.06.01" }],
-      };
-
-      const app = document.getElementById("app");
-      app.addEventListener("click", handleClick);
-      render();
-
-      function loadState() {
-        try {
-          return JSON.parse(localStorage.getItem("aqzoo-standalone-state") || "{}");
-        } catch (error) {
-          return {};
-        }
-      }
-
-      function saveState() {
-        localStorage.setItem("aqzoo-standalone-state", JSON.stringify(state));
-      }
-
-      function getCurrentAnimal() {
-        return animals.find((animal) => animal.id === state.currentAnimalId) || animals[0];
-      }
-
-      function getCurrentAquarium() {
-        return aquariums.find((aquarium) => aquarium.id === state.currentAquariumId) || aquariums[0];
-      }
-
-      function getCurrentReport() {
-        return reports.find((report) => report.id === state.currentReportId) || filteredReports()[0] || reports[0];
-      }
-
-      function getCurrentEvent() {
-        return events.find((event) => event.id === state.currentEventId) || events[0];
-      }
-
-      function getCurrentNotice() {
-        return notices.find((notice) => notice.id === state.currentNoticeId) || notices[0];
-      }
-
-      function filteredReports() {
-        if (state.reportFilter === "all") {
-          return reports;
-        }
-
-        if (state.reportFilter === "mine") {
-          return reports.filter((report) => report.animalId === state.currentAnimalId);
-        }
-
-        return reports.filter((report) => report.category === state.reportFilter);
-      }
-
-      function totalSupportForAnimal(animalId) {
-        return state.supports
-          .filter((entry) => entry.animalId === animalId)
-          .reduce((sum, entry) => sum + entry.amount, 0);
-      }
-
-      function totalMonthlySupport() {
-        return state.supports.reduce((sum, entry) => sum + entry.amount, 0);
-      }
-
-      function nextRankProgress() {
-        const amount = totalMonthlySupport();
-        const base = 5000;
-        const progress = Math.min((amount / base) * 100, 100);
-        return { amount, progress };
-      }
-
-      function money(value) {
-        return new Intl.NumberFormat("ja-JP").format(value) + "円";
-      }
-
-      function formatPlan(amount) {
-        return money(amount) + "/月";
-      }
-
-      function supportCount() {
-        return state.supports.length;
-      }
-
-      function rankLabel() {
-        const amount = totalMonthlySupport();
-        if (amount >= 5000) {
-          return "ゴールド";
-        }
-        if (amount >= 2000) {
-          return "シルバー";
-        }
-        return "ブロンズ";
-      }
-
-      function render() {
-        const aquarium = getCurrentAquarium();
-        const animal = getCurrentAnimal();
-        const report = getCurrentReport();
-        const event = getCurrentEvent();
-        const notice = getCurrentNotice();
-        const highlightReports = reports.slice(0, 2);
-        const progress = nextRankProgress();
-
-        app.innerHTML = `
-          <div class="shell">
-            <section class="desktop panel">
-              <div class="desktop-top">
-                <div class="brand">
-                  <div class="brand-mark">A</div>
-                  <div>
-                    <h1>Aqzoo</h1>
-                    <p>あなたの「推し」を毎月応援できるデジタルサポーター体験</p>
-                  </div>
-                </div>
-                <div class="mini-badge">${aquarium.city} / ${aquarium.focus}</div>
-              </div>
-
-              <section class="hero" style="--hero-gradient: ${animal.gradient}">
-                <div class="hero-layout">
-                  <div class="hero-copy">
-                    <span class="eyebrow">01 HOME / TOP</span>
-                    <h3>あなたの「推し」を、<br />毎月応援できる。</h3>
-                    <p>
-                      ${aquarium.name} で暮らす ${animal.name} を中心に、
-                      健康チェックや活動レポート、イベントの参加権までひとつにまとめた
-                      サポーターアプリです。
-                    </p>
-                    <div class="hero-actions">
-                      <button class="button" data-action="switch-tab" data-tab="support">今すぐ応援する</button>
-                      <button class="ghost-button" data-action="switch-tab" data-tab="reports">活動レポートを見る</button>
-                    </div>
-                  </div>
-                  <div class="hero-art">
-                    <div class="creature" aria-hidden="true"></div>
-                    <div class="art-caption">
-                      <div class="mini-copy">${animal.location}</div>
-                      <strong>${animal.name}</strong>
-                      <div>${formatPlan(animal.price)} から</div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <div class="desktop-grid">
-                <div class="stack">
-                  <section class="section-card">
-                    <div class="section-head">
-                      <div>
-                        <div class="kicker">02 生き物詳細</div>
-                        <h2 class="section-title">応援したい生き物を選ぶ</h2>
-                      </div>
-                      <span class="section-icon">AN</span>
-                    </div>
-                    <div class="selector-row">
-                      ${aquariums
-                        .map(
-                          (item) => `
-                            <button
-                              class="selector ${item.id === aquarium.id ? "is-active" : ""}"
-                              data-action="select-aquarium"
-                              data-aquarium="${item.id}"
-                            >
-                              ${item.name}
-                            </button>
-                          `,
-                        )
-                        .join("")}
-                    </div>
-                    <div class="animal-grid">
-                      ${animals
-                        .map(
-                          (item) => `
-                            <button
-                              class="animal-card ${item.id === animal.id ? "is-active" : ""}"
-                              style="--animal-gradient: ${item.gradient}"
-                              data-mark="${item.mark}"
-                              data-action="select-animal"
-                              data-animal="${item.id}"
-                            >
-                              <strong>${item.name}</strong>
-                              <div class="animal-meta">${item.nickname} / ${item.location}</div>
-                              <div class="animal-price">${formatPlan(item.price)} から</div>
-                              <span class="animal-badge">${item.badge}</span>
-                            </button>
-                          `,
-                        )
-                        .join("")}
-                    </div>
-                  </section>
-
-                  <section class="section-card">
-                    <div class="section-head">
-                      <div>
-                        <div class="kicker">03 応援プラン</div>
-                        <h2 class="section-title">${animal.name} を応援する</h2>
-                      </div>
-                      <span class="section-icon">SP</span>
-                    </div>
-                    <p class="detail-summary">${animal.summary}</p>
-                    <div class="shortcut-row">
-                      <button class="shortcut" data-action="switch-tab" data-tab="support">
-                        <div class="shortcut-icon">月</div>
-                        <span>${formatPlan(plans[0].amount)}</span>
-                      </button>
-                      <button class="shortcut" data-action="switch-tab" data-tab="reports">
-                        <div class="shortcut-icon">記</div>
-                        <span>活動レポート</span>
-                      </button>
-                      <button class="shortcut" data-action="switch-tab" data-tab="events">
-                        <div class="shortcut-icon">催</div>
-                        <span>イベント</span>
-                      </button>
-                    </div>
-                  </section>
-                </div>
-
-                <div class="stack">
-                  <section class="info-card">
-                    <div class="section-head">
-                      <div>
-                        <div class="kicker">推しのプロフィール</div>
-                        <h2 class="section-title">${animal.name} / ${animal.nickname}</h2>
-                      </div>
-                      <span class="section-icon">ID</span>
-                    </div>
-                    <p class="detail-summary">${animal.summary}</p>
-                    <div class="facts">
-                      ${animal.facts
-                        .map(
-                          (fact) => `
-                            <div class="fact">
-                              <div class="fact-label">${fact.label}</div>
-                              <div class="fact-value">${fact.value}</div>
-                            </div>
-                          `,
-                        )
-                        .join("")}
-                    </div>
-                  </section>
-
-                  <section class="info-card">
-                    <div class="section-head">
-                      <div>
-                        <div class="kicker">07 みんなの応援</div>
-                        <h2 class="section-title">ランキング</h2>
-                      </div>
-                      <span class="section-icon">RK</span>
-                    </div>
-                    <div class="ranking-list">
-                      ${ranking
-                        .map((item, index) => {
-                          const rankedAnimal = animals.find((animalItem) => animalItem.id === item.animalId);
-                          return `
-                            <div class="rank-item">
-                              <div class="rank-number">${index + 1}</div>
-                              <div>
-                                <strong>${rankedAnimal ? rankedAnimal.name : "-"}</strong>
-                                <div class="rank-caption">${rankedAnimal ? rankedAnimal.location : ""}</div>
-                              </div>
-                              <strong>${money(item.amount)}</strong>
-                            </div>
-                          `;
-                        })
-                        .join("")}
-                    </div>
-                  </section>
-
-                  <section class="info-card">
-                    <div class="section-head">
-                      <div>
-                        <div class="kicker">06 通知・お知らせ</div>
-                        <h2 class="section-title">最新ニュース</h2>
-                      </div>
-                      <span class="section-icon">NT</span>
-                    </div>
-                    <div class="timeline">
-                      ${notices
-                        .map(
-                          (item) => `
-                            <button
-                              class="notice-item ${item.id === notice.id ? "is-active" : ""}"
-                              data-action="select-notice"
-                              data-notice="${item.id}"
-                            >
-                              <div class="meta-row">
-                                <div class="kicker">${item.type}</div>
-                                <div class="notice-meta">${item.date}</div>
-                              </div>
-                              <strong>${item.title}</strong>
-                            </button>
-                          `,
-                        )
-                        .join("")}
-                    </div>
-                  </section>
-                </div>
-              </div>
-            </section>
-
-            <section class="phone panel">
-              <div class="phone-header">
-                <div class="status-bar">
-                  <span>9:41</span>
-                  <span>${aquarium.name}</span>
-                </div>
-                <div class="phone-brand">
-                  <div class="brand">
-                    <div class="mini-mark">A</div>
-                    <div>
-                      <h2>Aqzoo</h2>
-                      <p>${currentTabLabel()}</p>
-                    </div>
-                  </div>
-                  <div class="mini-badge">${rankLabel()} 会員</div>
-                </div>
-                <div class="chip-row">
-                  ${renderTabChips()}
-                </div>
-              </div>
-
-              <div class="phone-body">
-                ${renderPhoneBody(animal, report, event, notice, highlightReports, progress)}
-              </div>
-
-              <nav class="nav">
-                ${renderNav()}
-              </nav>
-            </section>
+function ScreenHeader({ title, subtitle, onBack, right, light = true }) {
+  return (
+    <div className="mt-4 flex items-start justify-between gap-3">
+      <div className="flex min-w-0 items-start gap-3">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className={classNames(
+              "mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full border",
+              light
+                ? "border-slate-200 bg-white text-slate-700"
+                : "border-white/15 bg-white/10 text-white",
+            )}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+        ) : null}
+        <div className="min-w-0">
+          <div
+            className={classNames(
+              "text-2xl font-black tracking-[-0.04em]",
+              light ? "text-[#10233c]" : "text-white",
+            )}
+          >
+            {title}
           </div>
-        `;
+          {subtitle ? (
+            <div
+              className={classNames(
+                "mt-1 text-xs leading-6",
+                light ? "text-slate-500" : "text-slate-200",
+              )}
+            >
+              {subtitle}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+function SurfaceCard({ children, dark = false, className = "" }) {
+  return (
+    <div
+      className={classNames(
+        "rounded-[24px] border p-4",
+        dark
+          ? "border-white/10 bg-white/10 text-white backdrop-blur"
+          : "border-slate-200 bg-white text-[#11284f] shadow-[0_18px_48px_rgba(17,40,79,0.08)]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function PrimaryButton({ children, className = "", ...props }) {
+  return (
+    <button
+      type="button"
+      className={classNames(
+        "inline-flex items-center justify-center rounded-[18px] bg-[#1656d9] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_rgba(22,86,217,0.28)] transition hover:brightness-110",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SecondaryButton({ children, className = "", ...props }) {
+  return (
+    <button
+      type="button"
+      className={classNames(
+        "inline-flex items-center justify-center rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#1656d9] transition hover:border-[#1656d9]",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+function FilterTabs({ items, active, onSelect, dark = false }) {
+  return (
+    <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+      {items.map((item) => {
+        const isActive = item === active;
+        return (
+          <button
+            key={item}
+            type="button"
+            onClick={() => onSelect(item)}
+            className={classNames(
+              "shrink-0 rounded-full px-4 py-2 text-[11px] font-black",
+              isActive
+                ? dark
+                  ? "bg-white text-[#10233c]"
+                  : "bg-[#173e72] text-white"
+                : dark
+                  ? "bg-white/10 text-white"
+                  : "bg-[#eff5ff] text-[#1656d9]",
+            )}
+          >
+            {item}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function BottomNav({ active, onSelect }) {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white/92 px-4 pb-5 pt-3 backdrop-blur">
+      <div className="grid grid-cols-5 gap-2">
+        {tabItems.map((item) => {
+          const isActive = item.key === active;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => onSelect(item.key)}
+              className={classNames(
+                "rounded-2xl px-2 py-2 text-center transition",
+                isActive ? "bg-[#eaf1ff] text-[#1656d9]" : "text-slate-500",
+              )}
+            >
+              <Icon className="mx-auto h-4 w-4" />
+              <div className="mt-1 text-[10px] font-black tracking-[-0.02em]">
+                {item.label}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ArtCanvas({ animal, label, detail, compact = false }) {
+  return (
+    <div
+      className={classNames(
+        "relative overflow-hidden rounded-[28px] bg-gradient-to-br",
+        animal.tones,
+        compact ? "h-24" : "h-64",
+      )}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.28),transparent_34%)]" />
+      <div className="absolute left-[-28px] top-10 h-28 w-28 rounded-full bg-white/10 blur-3xl" />
+      <div className="absolute right-[-20px] top-8 h-24 w-24 rounded-full bg-cyan-200/25 blur-3xl" />
+        <img
+          src={formatImageUrl(animal.id)}
+          alt={animal.name}
+          className={classNames(
+            "absolute object-cover drop-shadow-[0_18px_32px_rgba(0,0,0,0.25)] animate-[floatY_8s_ease-in-out_infinite]",
+            compact ? "bottom-3 right-3 h-20 w-20" : "bottom-10 right-6 h-40 w-40",
+          )}
+        />
+      <div
+        className="absolute left-5 top-5 h-14 w-14 rounded-full border border-white/18 bg-white/10 blur-xl animate-[floatY_11s_ease-in-out_infinite]"
+        style={{ animationDelay: "-2s" }}
+      />
+      <div
+        className="absolute left-16 top-20 h-4 w-4 rounded-full bg-white/30 animate-[floatY_9s_ease-in-out_infinite]"
+        style={{ animationDelay: "-4s" }}
+      />
+      <div className="absolute inset-x-4 bottom-4">
+        <div className="inline-flex rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[10px] font-black text-white/95 backdrop-blur">
+          {label}
+        </div>
+        {detail ? (
+          <div className="mt-3 max-w-[70%] text-sm font-black text-white">
+            {detail}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }) {
+  return (
+    <div className="rounded-[18px] border border-slate-100 bg-slate-50 px-3 py-3">
+      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+        {label}
+      </div>
+      <div className="mt-2 text-sm font-black text-[#11284f]">{value}</div>
+    </div>
+  );
+}
+
+function MenuRow({ icon: Icon, label, value, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-between rounded-[20px] border border-slate-200 bg-white px-4 py-4 text-left shadow-[0_16px_40px_rgba(17,40,79,0.06)]"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eff5ff] text-[#1656d9]">
+          <Icon className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="text-sm font-black text-[#11284f]">{label}</div>
+          {value ? <div className="mt-1 text-[11px] text-slate-500">{value}</div> : null}
+        </div>
+      </div>
+      <ChevronRight className="h-4 w-4 text-slate-400" />
+    </button>
+  );
+}
+
+function HomeScreen({
+  selectedAnimal,
+  notificationCount,
+  supported,
+  onSelectAnimal,
+  onOpenSupport,
+  onOpenReports,
+  onOpenRankings,
+  onOpenEvents,
+  onOpenNotifications,
+  onTabSelect,
+}) {
+  return (
+    <ScreenBase
+      className="bg-[linear-gradient(180deg,#08203b_0%,#10375e_36%,#0f2946_100%)] text-white"
+      bottomNav={<BottomNav active="home" onSelect={onTabSelect} />}
+    >
+      <div className="absolute left-[-40px] top-24 h-44 w-44 rounded-full bg-cyan-300/12 blur-3xl" />
+      <div className="absolute right-[-50px] top-6 h-44 w-44 rounded-full bg-blue-400/16 blur-3xl" />
+      <StatusBar />
+
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-xl font-black tracking-[-0.04em]">Aqzoo</div>
+        <div className="flex items-center gap-2 text-slate-100">
+          <button
+            type="button"
+            onClick={onOpenNotifications}
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/10"
+          >
+            <Bell className="h-4 w-4" />
+            {notificationCount > 0 ? (
+              <span className="absolute -right-1 -top-1 rounded-full bg-[#ff8b72] px-1.5 py-0.5 text-[9px] font-black text-white">
+                {notificationCount}
+              </span>
+            ) : null}
+          </button>
+          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/10">
+            <Menu className="h-4 w-4" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4">
+        <SurfaceCard dark className="overflow-hidden p-0">
+          <div className="grid gap-4 p-5">
+            <div>
+              <div className="max-w-[240px] text-[2rem] font-black leading-[1.12] tracking-[-0.05em]">
+                あなたの「推し」を、
+                <br />
+                毎月応援できる。
+              </div>
+              <p className="mt-3 max-w-[260px] text-xs leading-6 text-slate-200">
+                水族館・動物園の生き物を、日々のレポートと一緒にやさしく見守るアプリです。
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenSupport}
+              className="inline-flex w-full items-center justify-center rounded-[18px] bg-white px-4 py-3 text-sm font-black text-[#0f2946]"
+            >
+              今すぐ応援する
+            </button>
+          </div>
+          <div className="px-4 pb-4">
+            <ArtCanvas
+              animal={selectedAnimal}
+              label={`${selectedAnimal.nickname} の近況`}
+              detail={`${supported ? "応援中" : "おすすめ"} • ${formatYen(selectedAnimal.price)} / 月から`}
+            />
+          </div>
+        </SurfaceCard>
+
+        <div className="grid grid-cols-4 gap-2">
+          {animals.map((animal) => (
+            <button
+              key={animal.id}
+              type="button"
+              onClick={() => onSelectAnimal(animal.id)}
+              className={classNames(
+                "rounded-[20px] border bg-white/10 p-2 text-left backdrop-blur transition",
+                animal.id === selectedAnimal.id
+                  ? "border-cyan-200 shadow-[0_14px_30px_rgba(126,241,255,0.18)]"
+                  : "border-white/10",
+              )}
+            >
+              <ArtCanvas animal={animal} label={animal.name} compact />
+              <div className="mt-2 text-[11px] font-black">{animal.name}</div>
+              <div className="mt-1 text-[10px] text-slate-300">
+                {formatYen(animal.price)} / 月から
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div className="grid gap-2">
+          {homeBenefits.map((benefit) => (
+            <SurfaceCard key={benefit.title} dark className="rounded-[20px] px-4 py-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/12 text-cyan-100">
+                  <benefit.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-black">{benefit.title}</div>
+                  <div className="mt-1 text-[11px] leading-5 text-slate-200">
+                    {benefit.text}
+                  </div>
+                </div>
+              </div>
+            </SurfaceCard>
+          ))}
+        </div>
+
+        <SurfaceCard dark className="rounded-[24px]">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
+                今日の導線
+              </div>
+              <div className="mt-2 text-lg font-black">気になる情報へすぐ移動</div>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={onOpenReports}
+              className="rounded-[18px] bg-white/10 px-3 py-3 text-left text-[11px] font-black"
+            >
+              活動レポート
+            </button>
+            <button
+              type="button"
+              onClick={onOpenRankings}
+              className="rounded-[18px] bg-white/10 px-3 py-3 text-left text-[11px] font-black"
+            >
+              みんなの応援
+            </button>
+            <button
+              type="button"
+              onClick={onOpenEvents}
+              className="rounded-[18px] bg-white/10 px-3 py-3 text-left text-[11px] font-black"
+            >
+              体験イベント
+            </button>
+          </div>
+        </SurfaceCard>
+      </div>
+    </ScreenBase>
+  );
+}
+
+function DiscoverScreen({
+  animal,
+  supported,
+  followed,
+  onToggleFollow,
+  onOpenSupport,
+  onOpenReports,
+  onSelectAnimal,
+  onTabSelect,
+}) {
+  const relatedAnimals = animals.filter((item) => item.id !== animal.id).slice(0, 3);
+
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="discover" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader
+        title="生き物詳細"
+        subtitle="推しの魅力と支援導線をひとつの画面にまとめています。"
+        right={
+          <button
+            type="button"
+            onClick={onToggleFollow}
+            className={classNames(
+              "inline-flex h-10 w-10 items-center justify-center rounded-full border",
+              followed
+                ? "border-[#ffd2ca] bg-[#fff0ec] text-[#ff7f68]"
+                : "border-slate-200 bg-white text-slate-500",
+            )}
+          >
+            <Heart className={classNames("h-4 w-4", followed ? "fill-current" : "")} />
+          </button>
+        }
+      />
+
+      <div className="mt-4">
+        <ArtCanvas
+          animal={animal}
+          label={animal.location}
+          detail={`${animal.name} • ${formatYen(animal.price)} / 月`}
+        />
+      </div>
+
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="text-3xl font-black tracking-[-0.05em] text-[#10233c]">
+              {animal.name}
+            </div>
+            <BadgeCheck className="h-5 w-5 text-[#1656d9]" />
+          </div>
+          <div className="mt-2 text-sm font-bold text-slate-500">{animal.badge}</div>
+        </div>
+        <div className="rounded-full bg-[#eff5ff] px-3 py-2 text-[11px] font-black text-[#1656d9]">
+          {supported ? "応援中" : "募集中"}
+        </div>
+      </div>
+
+      <FilterTabs
+        items={["概要", "活動レポート", "ギャラリー"]}
+        active="概要"
+        onSelect={(tab) => {
+          if (tab === "活動レポート") onOpenReports();
+        }}
+      />
+
+      <SurfaceCard className="mt-4">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+          概要
+        </div>
+        <div className="mt-3 text-sm leading-7 text-slate-600">{animal.summary}</div>
+      </SurfaceCard>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        {animal.facts.map((fact) => (
+          <DetailRow key={fact.label} label={fact.label} value={fact.value} />
+        ))}
+      </div>
+
+      <div className="mt-5">
+        <div className="text-sm font-black text-[#11284f]">一緒に暮らす仲間たち</div>
+        <div className="mt-3 grid gap-3">
+          {relatedAnimals.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onSelectAnimal(item.id)}
+              className="flex items-center gap-3 rounded-[22px] border border-slate-200 bg-white p-3 text-left shadow-[0_12px_32px_rgba(17,40,79,0.06)]"
+            >
+              <div className="w-24 shrink-0">
+                <ArtCanvas animal={item} label={item.name} compact />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-black text-[#11284f]">{item.name}</div>
+                <div className="mt-1 text-[11px] text-slate-500">{formatYen(item.price)} / 月</div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <PrimaryButton className="mt-5 w-full" onClick={onOpenSupport}>
+        この子を応援する
+      </PrimaryButton>
+    </ScreenBase>
+  );
+}
+
+function SupportScreen({ animal, selectedPlanId, onSelectPlan, onBack, onConfirm }) {
+  return (
+    <ScreenBase className="bg-[#f7fbff]">
+      <StatusBar light />
+      <ScreenHeader
+        title="応援プランを選択"
+        subtitle={animal.name}
+        onBack={onBack}
+      />
+
+      <SurfaceCard className="mt-4 flex items-center gap-3">
+        <div className="w-24 shrink-0">
+          <ArtCanvas animal={animal} label={animal.name} compact />
+        </div>
+        <div>
+          <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
+          <div className="mt-1 text-[11px] text-slate-500">
+            継続応援で、毎月の活動を見守れます。
+          </div>
+        </div>
+      </SurfaceCard>
+
+      <div className="mt-4 grid gap-3">
+        {supportPlans.map((plan) => {
+          const selected = plan.id === selectedPlanId;
+          return (
+            <button
+              key={plan.id}
+              type="button"
+              onClick={() => onSelectPlan(plan.id)}
+              className={classNames(
+                "rounded-[24px] border p-4 text-left shadow-[0_16px_40px_rgba(17,40,79,0.06)]",
+                selected
+                  ? "border-[#1656d9] bg-[#eff5ff]"
+                  : "border-slate-200 bg-white",
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-lg font-black text-[#11284f]">{plan.label}</div>
+                  <div className="mt-1 text-sm font-black text-[#173e72]">{plan.title}</div>
+                  <div className="mt-2 text-[11px] leading-5 text-slate-500">
+                    {plan.perks}
+                  </div>
+                </div>
+                {plan.recommended ? (
+                  <div className="rounded-full bg-[#1656d9] px-3 py-1 text-[10px] font-black text-white">
+                    おすすめ
+                  </div>
+                ) : null}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <SurfaceCard className="mt-4">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+          お支払い方法
+        </div>
+        <div className="mt-3 flex items-center justify-between text-sm font-black text-[#11284f]">
+          <span>クレジットカード</span>
+          <ChevronRight className="h-4 w-4 text-slate-400" />
+        </div>
+      </SurfaceCard>
+
+      <PrimaryButton className="mt-6 w-full" onClick={onConfirm}>
+        次へ進む
+      </PrimaryButton>
+    </ScreenBase>
+  );
+}
+
+function SupportSuccessScreen({ animal, selectedPlan, onViewAnimal, onViewReports }) {
+  return (
+    <ScreenBase className="bg-white">
+      <StatusBar light />
+      <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#e8f8f0] text-emerald-600">
+          <CheckCircle2 className="h-10 w-10" />
+        </div>
+        <div className="mt-6 text-[2rem] font-black tracking-[-0.05em] text-[#10233c]">
+          応援が完了しました！
+        </div>
+        <div className="mt-3 text-sm leading-7 text-slate-500">
+          毎月の支援が、{animal.name} の健やかな暮らしを支えます。
+        </div>
+
+        <SurfaceCard className="mt-6 w-full max-w-[300px] text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-20 shrink-0">
+              <ArtCanvas animal={animal} label={animal.name} compact />
+            </div>
+            <div>
+              <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
+              <div className="mt-1 text-[11px] text-slate-500">{selectedPlan.label}</div>
+            </div>
+          </div>
+        </SurfaceCard>
+
+        <PrimaryButton className="mt-6 w-full max-w-[300px]" onClick={onViewAnimal}>
+          応援した生き物を見る
+        </PrimaryButton>
+        <SecondaryButton className="mt-3 w-full max-w-[300px]" onClick={onViewReports}>
+          活動レポートを見る
+        </SecondaryButton>
+      </div>
+    </ScreenBase>
+  );
+}
+
+function ReportsScreen({
+  filter,
+  filteredReports,
+  onFilterChange,
+  onOpenReport,
+  onTabSelect,
+}) {
+  const featuredReport = filteredReports[0];
+
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="reports" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader
+        title="活動レポート"
+        subtitle="写真、記録、近況をひとつの流れで追えます。"
+        right={
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600"
+          >
+            <Bell className="h-4 w-4" />
+          </button>
+        }
+      />
+
+      <FilterTabs
+        items={["すべて", "写真", "記録", "お知らせ"]}
+        active={filter}
+        onSelect={onFilterChange}
+      />
+
+      {featuredReport ? (
+        <button
+          type="button"
+          onClick={() => onOpenReport(featuredReport.id)}
+          className="mt-4 block w-full text-left"
+        >
+          <SurfaceCard>
+            <ArtCanvas
+              animal={findAnimal(featuredReport.animalId)}
+              label={featuredReport.date}
+              detail={featuredReport.title}
+            />
+            <div className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+              <span>{featuredReport.category}</span>
+              <span>・</span>
+              <span>{findAnimal(featuredReport.animalId).name}</span>
+            </div>
+            <div className="mt-2 text-sm leading-6 text-slate-600">
+              {featuredReport.excerpt}
+            </div>
+          </SurfaceCard>
+        </button>
+      ) : null}
+
+      <div className="mt-4 grid gap-3">
+        {filteredReports.slice(1).map((report) => {
+          const animal = findAnimal(report.animalId);
+          return (
+            <button
+              key={report.id}
+              type="button"
+              onClick={() => onOpenReport(report.id)}
+              className="block w-full text-left"
+            >
+              <SurfaceCard className="flex items-start gap-3">
+                <div className="w-24 shrink-0">
+                  <ArtCanvas animal={animal} label={animal.name} compact />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+                    {report.category}
+                  </div>
+                  <div className="mt-2 text-sm font-black text-[#11284f]">{report.title}</div>
+                  <div className="mt-2 text-[11px] leading-5 text-slate-500">
+                    {report.excerpt}
+                  </div>
+                  <div className="mt-2 text-[10px] text-slate-400">{report.date}</div>
+                </div>
+              </SurfaceCard>
+            </button>
+          );
+        })}
+      </div>
+
+      {!featuredReport ? (
+        <SurfaceCard className="mt-4 text-center">
+          <div className="text-sm font-black text-[#11284f]">
+            まだこの条件のレポートはありません
+          </div>
+          <div className="mt-2 text-[11px] leading-6 text-slate-500">
+            フィルターを切り替えると、別の記録やお知らせを確認できます。
+          </div>
+        </SurfaceCard>
+      ) : null}
+    </ScreenBase>
+  );
+}
+
+function ReportDetailScreen({ report, onBack, onOpenSupport }) {
+  const animal = findAnimal(report.animalId);
+
+  return (
+    <ScreenBase className="bg-[#f7fbff]">
+      <StatusBar light />
+      <ScreenHeader title="レポート詳細" subtitle={report.date} onBack={onBack} />
+
+      <div className="mt-4">
+        <ArtCanvas animal={animal} label={animal.name} detail={report.title} />
+      </div>
+
+      <SurfaceCard className="mt-4">
+        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+          {report.category}
+        </div>
+        <div className="mt-3 text-xl font-black tracking-[-0.03em] text-[#11284f]">
+          {report.title}
+        </div>
+        <div className="mt-3 text-sm leading-7 text-slate-600">{report.body}</div>
+      </SurfaceCard>
+
+      <div className="mt-4">
+        <div className="text-sm font-black text-[#11284f]">ギャラリー</div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          {[animal, animal, findAnimal("otter")].slice(0, 3).map((item, index) => (
+            <ArtCanvas
+              key={`${item.id}-${index}`}
+              animal={item}
+              label={index === 0 ? "朝の様子" : index === 1 ? "健康チェック" : "仲間たち"}
+              compact
+            />
+          ))}
+        </div>
+      </div>
+
+      <PrimaryButton className="mt-6 w-full" onClick={onOpenSupport}>
+        この子を応援する
+      </PrimaryButton>
+    </ScreenBase>
+  );
+}
+
+function MemberScreen({ animal, supported, selectedPlan, rankProgress, onTabSelect }) {
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="member" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader
+        title="会員証"
+        subtitle="応援プランや来園特典をまとめて確認できます。"
+      />
+
+      <div className="mt-4 rounded-[30px] bg-[linear-gradient(145deg,#08203b_0%,#143d70_52%,#081a30_100%)] p-5 text-white shadow-[0_30px_70px_rgba(6,24,46,0.18)]">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-xl font-black">Aqzoo</div>
+            <div className="mt-2 text-[11px] text-cyan-100">サポーター会員証</div>
+          </div>
+          <div className="rounded-full bg-white/10 px-3 py-2 text-[10px] font-black text-cyan-100">
+            {supported ? "有効" : "体験中"}
+          </div>
+        </div>
+        <div className="mt-6 flex items-end justify-between gap-3">
+          <div>
+            <div className="text-lg font-black">山田 太郎</div>
+            <div className="mt-1 text-[11px] text-slate-200">会員ID: AQZ0016745</div>
+            <div className="mt-1 text-[11px] text-slate-200">
+              {supported
+                ? `応援中: ${animal.name} / ${selectedPlan.label}`
+                : "応援を始めるとここにプラン情報が表示されます"}
+            </div>
+          </div>
+          <div className="rounded-[18px] bg-white p-3 text-[#08203b]">
+            <QrCode className="h-12 w-12" />
+          </div>
+        </div>
+      </div>
+
+      <SurfaceCard className="mt-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+              会員ランク
+            </div>
+            <div className="mt-2 text-xl font-black text-[#11284f]">
+              {supported ? "シルバー" : "スターター"}
+            </div>
+          </div>
+          <Crown className="h-7 w-7 text-amber-500" />
+        </div>
+        <div className="mt-4 h-3 rounded-full bg-slate-100">
+          <div
+            className="h-3 rounded-full bg-gradient-to-r from-[#67d7cf] to-[#1656d9]"
+            style={{ width: `${rankProgress}%` }}
+          />
+        </div>
+        <div className="mt-2 text-[11px] text-slate-500">
+          次のランクまで {supported ? "2,000pt" : "応援を始めると加算されます"}
+        </div>
+      </SurfaceCard>
+
+      <div className="mt-4 grid gap-3">
+        {[
+          "限定イベントに先行参加",
+          "活動レポートの先行公開",
+          "来園チェックインで特別バッジ",
+        ].map((item) => (
+          <SurfaceCard key={item} className="rounded-[20px] px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eff5ff] text-[#1656d9]">
+                <Star className="h-5 w-5" />
+              </div>
+              <div className="text-sm font-black text-[#11284f]">{item}</div>
+            </div>
+          </SurfaceCard>
+        ))}
+      </div>
+    </ScreenBase>
+  );
+}
+
+function MyPageScreen({
+  animal,
+  supported,
+  selectedPlan,
+  onOpenNotifications,
+  onOpenRankings,
+  onOpenEvents,
+  onOpenMember,
+  onTabSelect,
+}) {
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader
+        title="マイページ"
+        subtitle="お気に入りや会員情報、各種お知らせを確認できます。"
+      />
+
+      <div className="mt-4 rounded-[28px] bg-[linear-gradient(145deg,#08203b_0%,#10375e_65%,#1656d9_100%)] p-5 text-white shadow-[0_30px_70px_rgba(6,24,46,0.16)]">
+        <div className="flex items-center gap-4">
+          <img
+            src={formatImageUrl(selectedAnimalId)}
+            alt={selectedAnimal.name}
+            className="h-16 w-16 rounded-[22px] object-cover"
+          />
+          <div>
+            <div className="text-lg font-black">山田 太郎さん</div>
+            <div className="mt-1 text-[11px] text-slate-200">
+              会員ID: AQZ000345
+            </div>
+            <div className="mt-2 inline-flex rounded-full bg-white/12 px-3 py-1 text-[10px] font-black text-cyan-100">
+              {supported ? "サポーター会員" : "無料メンバー"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SurfaceCard className="mt-4">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+          応援中の生き物
+        </div>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="w-24 shrink-0">
+            <ArtCanvas animal={animal} label={animal.name} compact />
+          </div>
+          <div>
+            <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
+            <div className="mt-1 text-[11px] text-slate-500">
+              {supported ? selectedPlan.label : "まだ応援を開始していません"}
+            </div>
+          </div>
+        </div>
+      </SurfaceCard>
+
+      <div className="mt-4 grid gap-3">
+        <MenuRow icon={Bell} label="お知らせ" value="新着を確認する" onClick={onOpenNotifications} />
+        <MenuRow icon={Trophy} label="ランキング" value="みんなの応援を見る" onClick={onOpenRankings} />
+        <MenuRow icon={CalendarDays} label="体験イベント" value="参加できる企画を探す" onClick={onOpenEvents} />
+        <MenuRow icon={CreditCard} label="会員証を開く" value="特典やQRを確認する" onClick={onOpenMember} />
+      </div>
+    </ScreenBase>
+  );
+}
+
+function NotificationsScreen({
+  filter,
+  notificationsList,
+  onFilterChange,
+  onBack,
+  onTabSelect,
+}) {
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader title="お知らせ" subtitle="運営からの最新情報" onBack={onBack} />
+
+      <FilterTabs
+        items={["すべて", "お知らせ", "イベント", "メンテナンス"]}
+        active={filter}
+        onSelect={onFilterChange}
+      />
+
+      <div className="mt-4 grid gap-3">
+        {notificationsList.map((notice) => {
+          const animal = findAnimal(notice.animalId);
+          return (
+            <SurfaceCard key={notice.id} className="flex items-start gap-3">
+              <div className="w-20 shrink-0">
+                <ArtCanvas animal={animal} label={animal.name} compact />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+                    {notice.kind}
+                  </div>
+                  {notice.unread ? (
+                    <span className="h-2 w-2 rounded-full bg-[#ff6d55]" />
+                  ) : null}
+                </div>
+                <div className="mt-2 text-sm font-black text-[#11284f]">{notice.title}</div>
+                <div className="mt-2 text-[11px] leading-5 text-slate-500">
+                  {notice.excerpt}
+                </div>
+                <div className="mt-2 text-[10px] text-slate-400">{notice.date}</div>
+              </div>
+            </SurfaceCard>
+          );
+        })}
+      </div>
+    </ScreenBase>
+  );
+}
+
+function RankingsScreen({ range, onRangeChange, onBack, onTabSelect }) {
+  const rows = rankingRows[range];
+
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader
+        title="ランキング"
+        subtitle="みんなの応援を、動物ごとに見える化。"
+        onBack={onBack}
+      />
+
+      <FilterTabs
+        items={["今月", "先月", "累計"]}
+        active={range}
+        onSelect={onRangeChange}
+      />
+
+      <div className="mt-4 grid gap-3">
+        {rows.map((row) => {
+          const animal = findAnimal(row.animalId);
+          return (
+            <SurfaceCard key={`${range}-${row.rank}-${row.animalId}`} className="flex items-center gap-3">
+              <div className="w-5 text-center text-sm font-black text-slate-400">{row.rank}</div>
+              <div className="w-16 shrink-0">
+                <ArtCanvas animal={animal} label={animal.name} compact />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
+                <div className="mt-1 text-[11px] text-slate-500">動物別応援ランキング</div>
+              </div>
+              <div className="text-[11px] font-black text-[#173e72]">{row.value}</div>
+            </SurfaceCard>
+          );
+        })}
+      </div>
+
+      <SurfaceCard className="mt-4">
+        <div className="text-sm font-black text-[#11284f]">応援の声</div>
+        <div className="mt-3 grid gap-3">
+          {supporterVoices.map((voice) => (
+            <div key={voice.id} className="rounded-[18px] bg-slate-50 px-4 py-3">
+              <div className="text-sm font-black text-[#11284f]">{voice.name}</div>
+              <div className="mt-1 text-[11px] text-slate-500">{voice.meta}</div>
+            </div>
+          ))}
+        </div>
+      </SurfaceCard>
+    </ScreenBase>
+  );
+}
+
+function EventsScreen({ onOpenEvent, onBack, onTabSelect }) {
+  return (
+    <ScreenBase
+      className="bg-[#f7fbff]"
+      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
+    >
+      <StatusBar light />
+      <ScreenHeader
+        title="体験・イベント"
+        subtitle="現地での体験を、推しとのつながりに変える。"
+        onBack={onBack}
+      />
+
+      <div className="mt-4 grid gap-3">
+        {events.map((event) => {
+          const animal = findAnimal(event.animalId);
+          return (
+            <button
+              key={event.id}
+              type="button"
+              onClick={() => onOpenEvent(event.id)}
+              className="block w-full text-left"
+            >
+              <SurfaceCard>
+                <ArtCanvas animal={animal} label={event.date} detail={event.title} />
+                <div className="mt-3 text-[11px] leading-6 text-slate-500">{event.summary}</div>
+              </SurfaceCard>
+            </button>
+          );
+        })}
+      </div>
+    </ScreenBase>
+  );
+}
+
+function EventDetailScreen({ event, onBack }) {
+  const animal = findAnimal(event.animalId);
+
+  return (
+    <ScreenBase className="bg-[#f7fbff]">
+      <StatusBar light />
+      <ScreenHeader title="イベント詳細" subtitle={event.title} onBack={onBack} />
+
+      <div className="mt-4">
+        <ArtCanvas animal={animal} label={event.date} detail={event.title} />
+      </div>
+
+      <SurfaceCard className="mt-4">
+        <div className="text-sm leading-7 text-slate-600">{event.summary}</div>
+        <div className="mt-4 grid gap-3">
+          <DetailRow label="日時" value={event.date} />
+          <DetailRow label="場所" value={event.place} />
+          <DetailRow label="参加費" value={event.fee} />
+          <DetailRow label="定員" value={event.capacity} />
+        </div>
+      </SurfaceCard>
+
+      <PrimaryButton className="mt-6 w-full">申し込む</PrimaryButton>
+    </ScreenBase>
+  );
+}
+
+function DesktopHero() {
+  return (
+    <div className="rounded-[36px] border border-white/12 bg-[linear-gradient(155deg,#081a32_0%,#0f2946_58%,#103e68_100%)] p-7 text-white shadow-[0_34px_90px_rgba(6,24,46,0.18)]">
+      <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-cyan-100">
+        Aqzoo App
+      </div>
+      <h1 className="mt-5 font-display text-5xl font-black leading-[1.02] tracking-[-0.05em]">
+        あなたの「推し」を、
+        <br />
+        毎月応援できる。
+      </h1>
+      <p className="mt-5 text-sm leading-8 text-slate-200">
+        ホーム、応援、活動レポート、会員証、通知、ランキング、イベントを、
+        参考画像の導線に沿ってそのまま触れるモバイル体験として再構成しました。
+      </p>
+
+      <div className="mt-6 grid gap-3">
+        {desktopFeatures.map((feature) => (
+          <div
+            key={feature.title}
+            className="rounded-[24px] border border-white/10 bg-white/10 p-4 backdrop-blur"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-cyan-100">
+                <feature.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-sm font-black">{feature.title}</div>
+                <div className="mt-2 text-[11px] leading-6 text-slate-200">
+                  {feature.text}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DesktopFlow() {
+  return (
+    <div className="rounded-[30px] border border-slate-200 bg-white/90 p-5 shadow-[0_22px_70px_rgba(17,40,79,0.08)] backdrop-blur">
+      <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+        ユーザー体験フロー
+      </div>
+      <div className="mt-4 grid gap-3">
+        {experienceFlow.map((step, index) => (
+          <div key={step} className="flex items-start gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eff5ff] text-[11px] font-black text-[#1656d9]">
+              {index + 1}
+            </div>
+            <div className="pt-1 text-sm leading-6 text-slate-600">{step}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ShortcutButton({ label, active = false, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={classNames(
+        "rounded-[18px] px-4 py-3 text-left text-sm font-black transition",
+        active
+          ? "bg-[#1656d9] text-white shadow-[0_18px_34px_rgba(22,86,217,0.24)]"
+          : "bg-[#eff5ff] text-[#1656d9]",
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
+function App() {
+  const rootScreens = React.useMemo(
+    () => new Set(["home", "discover", "reports", "member", "mypage"]),
+    [],
+  );
+
+  const [stack, setStack] = React.useState(["home"]);
+  const [selectedAnimalId, setSelectedAnimalId] = React.useState("penguin");
+  const [selectedPlanId, setSelectedPlanId] = React.useState("starter");
+  const [supportCompleted, setSupportCompleted] = React.useState(false);
+  const [followed, setFollowed] = React.useState(true);
+  const [reportFilter, setReportFilter] = React.useState("すべて");
+  const [noticeFilter, setNoticeFilter] = React.useState("すべて");
+  const [selectedReportId, setSelectedReportId] = React.useState(reports[0].id);
+  const [selectedEventId, setSelectedEventId] = React.useState(events[0].id);
+  const [rankingRange, setRankingRange] = React.useState("今月");
+  const [notificationCount, setNotificationCount] = React.useState(3);
+
+  const selectedAnimal = findAnimal(selectedAnimalId);
+  const selectedPlan =
+    supportPlans.find((plan) => plan.id === selectedPlanId) ?? supportPlans[0];
+  const selectedReport =
+    reports.find((report) => report.id === selectedReportId) ?? reports[0];
+  const selectedEvent =
+    events.find((event) => event.id === selectedEventId) ?? events[0];
+  const deferredReportFilter = React.useDeferredValue(reportFilter);
+  const deferredNoticeFilter = React.useDeferredValue(noticeFilter);
+  const currentScreen = stack[stack.length - 1];
+  const activeRoot =
+    [...stack].reverse().find((screen) => rootScreens.has(screen)) ?? "home";
+  const rankProgress = supportCompleted ? 72 : 38;
+
+  const filteredReports = React.useMemo(() => {
+    return reports.filter((report) => {
+      if (deferredReportFilter !== "すべて" && report.category !== deferredReportFilter) {
+        return false;
       }
-
-      function currentTabLabel() {
-        const labels = {
-          home: "ホーム・トップ",
-          support: "応援する",
-          reports: "活動レポート",
-          events: "施設・体験・イベント",
-          mypage: "マイページ・会員証",
-        };
-        return labels[state.currentTab] || labels.home;
+      if (activeRoot === "discover" || currentScreen === "support") {
+        return report.animalId === selectedAnimalId;
       }
+      return true;
+    });
+  }, [currentScreen, activeRoot, deferredReportFilter, selectedAnimalId]);
 
-      function renderTabChips() {
-        const tabs = [
-          ["home", "ホーム"],
-          ["support", "応援"],
-          ["reports", "レポート"],
-          ["events", "イベント"],
-          ["mypage", "マイページ"],
-        ];
-
-        return tabs
-          .map(
-            ([id, label]) => `
-              <button class="chip ${state.currentTab === id ? "is-active" : ""}" data-action="switch-tab" data-tab="${id}">
-                ${label}
-              </button>
-            `,
-          )
-          .join("");
+  const filteredNotifications = React.useMemo(() => {
+    return notifications.filter((notice) => {
+      if (deferredNoticeFilter === "すべて") {
+        return true;
       }
+      return notice.kind === deferredNoticeFilter;
+    });
+  }, [deferredNoticeFilter]);
 
-      function renderPhoneBody(animal, report, event, notice, highlightReports, progress) {
-        if (state.currentTab === "support") {
-          return renderSupportTab(animal);
-        }
+  const resetTo = (screen) => {
+    React.startTransition(() => {
+      setStack([screen]);
+    });
+  };
 
-        if (state.currentTab === "reports") {
-          return renderReportsTab(report);
-        }
+  const push = (screen) => {
+    React.startTransition(() => {
+      setStack((current) => [...current, screen]);
+    });
+  };
 
-        if (state.currentTab === "events") {
-          return renderEventsTab(event);
-        }
+  const goBack = () => {
+    React.startTransition(() => {
+      setStack((current) => (current.length > 1 ? current.slice(0, -1) : current));
+    });
+  };
 
-        if (state.currentTab === "mypage") {
-          return renderMyPageTab(notice, progress);
-        }
+  const openAnimal = (animalId) => {
+    setSelectedAnimalId(animalId);
+    resetTo("discover");
+  };
 
-        return `
-          <section class="mobile-hero" style="--hero-gradient: ${animal.gradient}">
-            <div class="kicker">毎月の推し活サポート</div>
-            <strong>${animal.name} を見守ろう</strong>
-            <p class="detail-summary">${animal.summary}</p>
-            <div class="hero-actions" style="margin-top: 14px;">
-              <button class="button" data-action="switch-tab" data-tab="support">応援プランを見る</button>
-              <button class="ghost-button" data-action="select-animal" data-animal="${animals[(animals.findIndex((item) => item.id === animal.id) + 1) % animals.length].id}">次の生き物へ</button>
-            </div>
-          </section>
+  const openSupport = () => {
+    push("support");
+  };
 
-          <section class="stat-grid">
-            <div class="stat-card">
-              <div class="kicker">月額応援</div>
-              <span class="stat-value">${money(totalMonthlySupport())}</span>
-            </div>
-            <div class="stat-card">
-              <div class="kicker">推し登録</div>
-              <span class="stat-value">${supportCount()}件</span>
-            </div>
-            <div class="stat-card">
-              <div class="kicker">会員ランク</div>
-              <span class="stat-value">${rankLabel()}</span>
-            </div>
-          </section>
+  const completeSupport = () => {
+    setSupportCompleted(true);
+    setNotificationCount((current) => current + 1);
+    push("support-success");
+  };
 
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">おすすめの生き物</div>
-                <h3>${animal.name} を中心にチェック</h3>
+  const openReport = (reportId) => {
+    setSelectedReportId(reportId);
+    push("report-detail");
+  };
+
+  const openEvent = (eventId) => {
+    setSelectedEventId(eventId);
+    push("event-detail");
+  };
+
+  let screen = null;
+
+  if (currentScreen === "home") {
+    screen = (
+      <HomeScreen
+        selectedAnimal={selectedAnimal}
+        notificationCount={notificationCount}
+        supported={supportCompleted}
+        onSelectAnimal={openAnimal}
+        onOpenSupport={openSupport}
+        onOpenReports={() => resetTo("reports")}
+        onOpenRankings={() => push("rankings")}
+        onOpenEvents={() => push("events")}
+        onOpenNotifications={() => push("notifications")}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "discover") {
+    screen = (
+      <DiscoverScreen
+        animal={selectedAnimal}
+        supported={supportCompleted}
+        followed={followed}
+        onToggleFollow={() => setFollowed((current) => !current)}
+        onOpenSupport={openSupport}
+        onOpenReports={() => resetTo("reports")}
+        onSelectAnimal={openAnimal}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "support") {
+    screen = (
+      <SupportScreen
+        animal={selectedAnimal}
+        selectedPlanId={selectedPlanId}
+        onSelectPlan={setSelectedPlanId}
+        onBack={goBack}
+        onConfirm={completeSupport}
+      />
+    );
+  } else if (currentScreen === "support-success") {
+    screen = (
+      <SupportSuccessScreen
+        animal={selectedAnimal}
+        selectedPlan={selectedPlan}
+        onViewAnimal={() => resetTo("discover")}
+        onViewReports={() => resetTo("reports")}
+      />
+    );
+  } else if (currentScreen === "reports") {
+    screen = (
+      <ReportsScreen
+        filter={reportFilter}
+        filteredReports={filteredReports}
+        onFilterChange={setReportFilter}
+        onOpenReport={openReport}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "report-detail") {
+    screen = (
+      <ReportDetailScreen
+        report={selectedReport}
+        onBack={goBack}
+        onOpenSupport={() => {
+          setSelectedAnimalId(selectedReport.animalId);
+          setStack(["discover", "support"]);
+        }}
+      />
+    );
+  } else if (currentScreen === "member") {
+    screen = (
+      <MemberScreen
+        animal={selectedAnimal}
+        supported={supportCompleted}
+        selectedPlan={selectedPlan}
+        rankProgress={rankProgress}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "mypage") {
+    screen = (
+      <MyPageScreen
+        animal={selectedAnimal}
+        supported={supportCompleted}
+        selectedPlan={selectedPlan}
+        onOpenNotifications={() => push("notifications")}
+        onOpenRankings={() => push("rankings")}
+        onOpenEvents={() => push("events")}
+        onOpenMember={() => resetTo("member")}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "notifications") {
+    screen = (
+      <NotificationsScreen
+        filter={noticeFilter}
+        notificationsList={filteredNotifications}
+        onFilterChange={setNoticeFilter}
+        onBack={goBack}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "rankings") {
+    screen = (
+      <RankingsScreen
+        range={rankingRange}
+        onRangeChange={setRankingRange}
+        onBack={goBack}
+        onTabSelect={resetTo}
+      />
+    );
+  } else if (currentScreen === "events") {
+    screen = (
+      <EventsScreen onOpenEvent={openEvent} onBack={goBack} onTabSelect={resetTo} />
+    );
+  } else {
+    screen = <EventDetailScreen event={selectedEvent} onBack={goBack} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(126,241,255,0.14),transparent_24%),linear-gradient(180deg,#f7fbff_0%,#eef4fb_100%)]">
+      <div className="mx-auto max-w-[1480px] px-4 py-5 md:px-6 xl:px-8">
+        <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)_300px]">
+          <div className="hidden xl:grid content-start gap-6">
+            <DesktopHero />
+            <DesktopFlow />
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="hidden lg:block xl:hidden w-full rounded-[30px] border border-white/60 bg-white/75 p-5 shadow-[0_20px_60px_rgba(17,40,79,0.08)] backdrop-blur">
+              <div className="inline-flex rounded-full bg-[#eff5ff] px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-[#1656d9]">
+                Aqzoo App
               </div>
-              <span class="section-icon">AN</span>
+              <div className="mt-3 text-3xl font-black tracking-[-0.05em] text-[#10233c]">
+                あなたの「推し」を、毎月応援できる。
             </div>
-            <div class="animal-grid">
-              ${animals
-                .slice(0, 4)
-                .map(
-                  (item) => `
-                    <button
-                      class="animal-card ${item.id === animal.id ? "is-active" : ""}"
-                      style="--animal-gradient: ${item.gradient}"
-                      data-mark="${item.mark}"
-                      data-action="select-animal"
-                      data-animal="${item.id}"
-                    >
-                      <strong>${item.name}</strong>
-                      <div class="animal-meta">${formatPlan(item.price)} から</div>
-                      <span class="animal-badge">${item.badge}</span>
-                    </button>
-                  `,
-                )
-                .join("")}
+            <div className="mt-3 text-sm leading-7 text-slate-600">
+              参考画像の流れに沿って、ホームから応援、レポート、会員証まで操作できます。
             </div>
-          </section>
+            </div>
 
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">主なナビゲーション</div>
-                <h3>最短でやりたいことへ</h3>
+            <PhoneFrame>{screen}</PhoneFrame>
+          </div>
+
+          <div className="hidden xl:grid content-start gap-4">
+            <div className="rounded-[30px] border border-slate-200 bg-white/90 p-5 shadow-[0_22px_70px_rgba(17,40,79,0.08)] backdrop-blur">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+                ライブ状態
               </div>
-              <span class="section-icon">GO</span>
-            </div>
-            <div class="shortcut-row">
-              <button class="shortcut" data-action="switch-tab" data-tab="support">
-                <div class="shortcut-icon">応</div>
-                <span>応援する</span>
-              </button>
-              <button class="shortcut" data-action="switch-tab" data-tab="reports">
-                <div class="shortcut-icon">活</div>
-                <span>活動レポート</span>
-              </button>
-              <button class="shortcut" data-action="switch-tab" data-tab="events">
-                <div class="shortcut-icon">催</div>
-                <span>イベント</span>
-              </button>
-            </div>
-          </section>
-
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">最近の活動レポート</div>
-                <h3>応援の成果を確認</h3>
-              </div>
-              <span class="section-icon">RP</span>
-            </div>
-            <div class="report-highlights">
-              ${highlightReports
-                .map(
-                  (item) => `
-                    <button class="highlight-card" data-action="open-report" data-report="${item.id}">
-                      <div class="report-meta">${item.date}</div>
-                      <strong>${item.title}</strong>
-                      <p class="detail-summary">${item.excerpt}</p>
-                    </button>
-                  `,
-                )
-                .join("")}
-            </div>
-          </section>
-
-          <section class="benefit-grid">
-            <div class="benefit-card">
-              <div class="kicker">特典</div>
-              <strong>限定レポート</strong>
-              <p class="detail-summary">毎月の観察記録や写真付きレポートを会員向けに配信します。</p>
-            </div>
-            <div class="benefit-card">
-              <div class="kicker">コミュニティ</div>
-              <strong>みんなの応援</strong>
-              <p class="detail-summary">${comments[0]}</p>
-            </div>
-          </section>
-        `;
-      }
-
-      function renderSupportTab(animal) {
-        const lastSupport = [...state.supports].reverse().find((entry) => entry.animalId === animal.id);
-
-        return `
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">応援プランを選択</div>
-                <h3>${animal.name}</h3>
-              </div>
-              <span class="section-icon">SP</span>
-            </div>
-            <p class="detail-summary">${animal.summary}</p>
-            <div class="plan-list">
-              ${plans
-                .map(
-                  (plan) => `
-                    <button
-                      class="plan ${state.selectedPlanAmount === plan.amount ? "is-active" : ""}"
-                      data-action="pick-plan"
-                      data-plan="${plan.amount}"
-                    >
-                      <div class="plan-price">${formatPlan(plan.amount)}</div>
-                      <strong>${plan.title}</strong>
-                      <div class="support-meta">${plan.description}</div>
-                    </button>
-                  `,
-                )
-                .join("")}
-            </div>
-            <div class="hero-actions" style="margin-top: 16px;">
-              <button class="button" data-action="complete-support">このプランで応援する</button>
-              <button class="ghost-button" data-action="switch-tab" data-tab="reports">活動レポートへ</button>
-            </div>
-          </section>
-
-          <section class="support-confirm">
-            <div class="support-badge">応援履歴</div>
-            <h3>${lastSupport ? "直近の応援が反映されています" : "まだこの生き物の応援はありません"}</h3>
-            ${
-              lastSupport
-                ? `
-                    <strong>${animal.name} / ${formatPlan(lastSupport.amount)}</strong>
-                    <p class="detail-summary">応援日: ${lastSupport.date}</p>
-                    <p class="detail-summary">累計応援額: ${money(totalSupportForAnimal(animal.id))}</p>
-                  `
-                : `<p class="detail-summary">プランを選ぶと、ここに応援完了の履歴が表示されます。</p>`
-            }
-          </section>
-
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">みんなの応援</div>
-                <h3>今月のランキング</h3>
-              </div>
-              <span class="section-icon">RK</span>
-            </div>
-            <div class="ranking-list">
-              ${ranking
-                .slice(0, 3)
-                .map((item, index) => {
-                  const rankedAnimal = animals.find((animalItem) => animalItem.id === item.animalId);
-                  return `
-                    <div class="rank-item">
-                      <div class="rank-number">${index + 1}</div>
-                      <div>
-                        <strong>${rankedAnimal ? rankedAnimal.name : "-"}</strong>
-                        <div class="rank-caption">${comments[index]}</div>
-                      </div>
-                      <strong>${money(item.amount)}</strong>
-                    </div>
-                  `;
-                })
-                .join("")}
-            </div>
-          </section>
-        `;
-      }
-
-      function renderReportsTab(report) {
-        const filtered = filteredReports();
-
-        return `
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">活動レポート</div>
-                <h3>応援の成果記録</h3>
-              </div>
-              <span class="section-icon">RP</span>
-            </div>
-            <div class="chip-row" style="margin-bottom: 12px;">
-              ${[
-                ["all", "すべて"],
-                ["mine", "推し"],
-                ["health", "健康"],
-                ["activity", "行動"],
-                ["photo", "写真"],
-              ]
-                .map(
-                  ([id, label]) => `
-                    <button class="chip ${state.reportFilter === id ? "is-active" : ""}" data-action="filter-report" data-filter="${id}">
-                      ${label}
-                    </button>
-                  `,
-                )
-                .join("")}
-            </div>
-            <div class="report-list">
-              ${
-                filtered.length
-                  ? filtered
-                      .map(
-                        (item) => `
-                          <button
-                            class="report-item ${item.id === report.id ? "is-active" : ""}"
-                            data-action="open-report"
-                            data-report="${item.id}"
-                          >
-                            <div class="meta-row">
-                              <div class="kicker">${item.category}</div>
-                              <div class="report-meta">${item.date}</div>
-                            </div>
-                            <strong>${item.title}</strong>
-                            <p class="detail-summary">${item.excerpt}</p>
-                          </button>
-                        `,
-                      )
-                      .join("")
-                  : `<div class="empty-text">この条件に合うレポートはまだありません。</div>`
-              }
-            </div>
-          </section>
-
-          <section class="detail-card">
-            <div class="report-topline">
-              <div>
-                <div class="kicker">レポート詳細</div>
-                <h3>${report.title}</h3>
-              </div>
-              <div class="mini-badge">${report.date}</div>
-            </div>
-            <p class="detail-summary">${report.detail}</p>
-          </section>
-        `;
-      }
-
-      function renderEventsTab(event) {
-        return `
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">施設・体験・イベント</div>
-                <h3>会員向けイベント</h3>
-              </div>
-              <span class="section-icon">EV</span>
-            </div>
-            <div class="event-list">
-              ${events
-                .map(
-                  (item) => `
-                    <button
-                      class="event-item ${item.id === event.id ? "is-active" : ""}"
-                      data-action="select-event"
-                      data-event="${item.id}"
-                    >
-                      <div class="event-meta">${item.date} / ${item.time}</div>
-                      <strong>${item.title}</strong>
-                      <p class="detail-summary">${item.summary}</p>
-                    </button>
-                  `,
-                )
-                .join("")}
-            </div>
-          </section>
-
-          <section class="detail-card">
-            <div class="kicker">イベント詳細</div>
-            <h3>${event.title}</h3>
-            <div class="facts">
-              <div class="fact">
-                <div class="fact-label">日時</div>
-                <div class="fact-value">${event.date} / ${event.time}</div>
-              </div>
-              <div class="fact">
-                <div class="fact-label">定員</div>
-                <div class="fact-value">${event.capacity}</div>
-              </div>
-              <div class="fact">
-                <div class="fact-label">会場</div>
-                <div class="fact-value">${event.place}</div>
+              <div className="mt-4 grid gap-3">
+                <div className="rounded-[20px] bg-slate-50 px-4 py-3">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    現在の画面
+                  </div>
+                  <div className="mt-2 text-sm font-black text-[#11284f]">
+                    {tabItems.find((item) => item.key === activeRoot)?.label ?? currentScreen}
+                  </div>
+                </div>
+                <div className="rounded-[20px] bg-slate-50 px-4 py-3">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    選択中の生き物
+                  </div>
+                  <div className="mt-2 text-sm font-black text-[#11284f]">
+                    {selectedAnimal.name}
+                  </div>
+                </div>
+                <div className="rounded-[20px] bg-slate-50 px-4 py-3">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    応援状態
+                  </div>
+                  <div className="mt-2 text-sm font-black text-[#11284f]">
+                    {supportCompleted ? `${selectedPlan.label} で応援中` : "未開始"}
+                  </div>
+                </div>
               </div>
             </div>
-            <p class="detail-summary" style="margin-top: 12px;">${event.summary}</p>
-            <div class="hero-actions" style="margin-top: 16px;">
-              <button class="button" data-action="switch-tab" data-tab="mypage">会員証を確認する</button>
-            </div>
-          </section>
-        `;
-      }
 
-      function renderMyPageTab(notice, progress) {
-        return `
-          <section class="membership-card">
-            <div class="membership-top">
-              <div>
-                <div class="kicker">会員証</div>
-                <h3>デジタルサポーター会員証</h3>
-                <strong>山田 太郎</strong>
-                <div class="member-id">会員ID: AQ20011345</div>
+            <div className="rounded-[30px] border border-slate-200 bg-white/90 p-5 shadow-[0_22px_70px_rgba(17,40,79,0.08)] backdrop-blur">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
+                クイックジャンプ
               </div>
-              <div class="qr" aria-hidden="true"></div>
-            </div>
-            <div class="member-stats" style="margin-top: 16px;">
-              <div class="member-stat">
-                <div class="kicker">現在のランク</div>
-                <span class="member-value">${rankLabel()}</span>
+              <div className="mt-4 grid gap-3">
+                <ShortcutButton
+                  label="ホーム"
+                  active={currentScreen === "home"}
+                  onClick={() => resetTo("home")}
+                />
+                <ShortcutButton
+                  label="生き物詳細"
+                  active={currentScreen === "discover"}
+                  onClick={() => resetTo("discover")}
+                />
+                <ShortcutButton
+                  label="応援プラン"
+                  active={currentScreen === "support"}
+                  onClick={() => setStack(["discover", "support"])}
+                />
+                <ShortcutButton
+                  label="活動レポート"
+                  active={currentScreen === "reports" || currentScreen === "report-detail"}
+                  onClick={() => resetTo("reports")}
+                />
+                <ShortcutButton
+                  label="会員証"
+                  active={currentScreen === "member"}
+                  onClick={() => resetTo("member")}
+                />
+                <ShortcutButton
+                  label="お知らせ"
+                  active={currentScreen === "notifications"}
+                  onClick={() => setStack(["mypage", "notifications"])}
+                />
+                <ShortcutButton
+                  label="ランキング"
+                  active={currentScreen === "rankings"}
+                  onClick={() => setStack(["mypage", "rankings"])}
+                />
+                <ShortcutButton
+                  label="イベント"
+                  active={currentScreen === "events" || currentScreen === "event-detail"}
+                  onClick={() => setStack(["mypage", "events"])}
+                />
               </div>
-              <div class="member-stat">
-                <div class="kicker">応援中</div>
-                <span class="member-value">${supportCount()}件</span>
-              </div>
             </div>
-          </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-          <section class="section-panel">
-            <div class="membership-top">
-              <div>
-                <div class="kicker">会員ランク</div>
-                <h3>次のランクまであと少し</h3>
-              </div>
-              <div class="mini-badge">${money(Math.max(5000 - progress.amount, 0))} でゴールド</div>
-            </div>
-            <div class="progress-bar" style="margin: 12px 0 8px; --progress: ${progress.progress}%;">
-              <span></span>
-            </div>
-            <div class="progress-meta">累計月額応援 ${money(progress.amount)} / 5,000円</div>
-          </section>
+createRoot(document.getElementById("root")).render(<App />);
 
-          <section class="section-panel">
-            <div class="section-head">
-              <div>
-                <div class="kicker">お気に入りのお知らせ</div>
-                <h3>${notice.title}</h3>
-              </div>
-              <span class="section-icon">NT</span>
-            </div>
-            <p class="detail-summary">${notice.detail}</p>
-            <div class="notice-list" style="margin-top: 12px;">
-              ${notices
-                .map(
-                  (item) => `
-                    <button
-                      class="notice-item ${item.id === notice.id ? "is-active" : ""}"
-                      data-action="select-notice"
-                      data-notice="${item.id}"
-                    >
-                      <div class="meta-row">
-                        <div class="kicker">${item.type}</div>
-                        <div class="notice-meta">${item.date}</div>
-                      </div>
-                      <strong>${item.title}</strong>
-                    </button>
-                  `,
-                )
-                .join("")}
-            </div>
-          </section>
-        `;
-      }
-
-      function renderNav() {
-        const items = [
-          ["home", "HM", "ホーム"],
-          ["support", "SP", "応援"],
-          ["reports", "RP", "レポート"],
-          ["events", "EV", "イベント"],
-          ["mypage", "ME", "マイページ"],
-        ];
-
-        return items
-          .map(
-            ([id, icon, label]) => `
-              <button class="nav-item ${state.currentTab === id ? "is-active" : ""}" data-action="switch-tab" data-tab="${id}">
-                <span class="nav-icon">${icon}</span>
-                <span class="nav-label">${label}</span>
-              </button>
-            `,
-          )
-          .join("");
-      }
-
-      function handleClick(event) {
-        const target = event.target.closest("[data-action]");
-        if (!target) {
-          return;
-        }
-
-        const action = target.dataset.action;
-
-        if (action === "switch-tab") {
-          state.currentTab = target.dataset.tab;
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "select-aquarium") {
-          state.currentAquariumId = target.dataset.aquarium;
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "select-animal") {
-          state.currentAnimalId = target.dataset.animal;
-          if (state.reportFilter === "mine") {
-            const currentFiltered = filteredReports();
-            state.currentReportId = currentFiltered[0] ? currentFiltered[0].id : reports[0].id;
-          }
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "pick-plan") {
-          state.selectedPlanAmount = Number(target.dataset.plan);
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "complete-support") {
-          state.supports.push({
-            animalId: state.currentAnimalId,
-            amount: state.selectedPlanAmount,
-            date: new Date().toLocaleDateString("ja-JP").split("/").join("."),
-          });
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "filter-report") {
-          state.reportFilter = target.dataset.filter;
-          const nextReport = filteredReports()[0];
-          if (nextReport) {
-            state.currentReportId = nextReport.id;
-          }
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "open-report") {
-          state.currentReportId = target.dataset.report;
-          state.currentTab = "reports";
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "select-event") {
-          state.currentEventId = target.dataset.event;
-          saveState();
-          render();
-          return;
-        }
-
-        if (action === "select-notice") {
-          state.currentNoticeId = target.dataset.notice;
-          saveState();
-          render();
-        }
-      }
     </script>
   </body>
 </html>
-
