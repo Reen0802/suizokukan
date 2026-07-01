@@ -2,21 +2,11 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aqzoo | 推しを毎月応援できるアプリ</title>
-    <meta
-      name="description"
-      content="Aqzooの日本語モバイルアプリ。推しの生き物を応援し、活動レポートや会員証、イベントまで体験できます。"
-    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&family=Shippori+Mincho:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -25,9 +15,6 @@
             fontFamily: {
               sans: ['"M PLUS 1p"', '"Noto Sans JP"', "sans-serif"],
               display: ['"Shippori Mincho"', '"Noto Serif JP"', "serif"],
-            },
-            boxShadow: {
-              aqua: "0 24px 70px rgba(15, 23, 42, 0.14)",
             },
           },
         },
@@ -46,1940 +33,416 @@
       }
     </script>
     <style>
-      html {
-        scroll-behavior: smooth;
-      }
-
-      :root {
-        --bg-top: #07192f;
-        --bg-bottom: #f4fbff;
-        --ink: #10233c;
-        --accent: #7ef1ff;
-        --accent-warm: #ffb37b;
-      }
-
+      :root { --ink: #10233c; --bg-top: #07192f; --bg-bottom: #f4fbff; }
       body {
-        margin: 0;
-        min-height: 100vh;
-        background:
-          radial-gradient(circle at top, rgba(126, 241, 255, 0.16), transparent 28%),
-          linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(244, 251, 255, 0.98)),
-          var(--bg-bottom);
+        margin: 0; min-height: 100vh;
+        background: radial-gradient(circle at top, rgba(126, 241, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(244, 251, 255, 0.98)), var(--bg-bottom);
         font-family: "M PLUS 1p", "Noto Sans JP", sans-serif;
-        color: var(--ink);
-        -webkit-font-smoothing: antialiased;
+        color: var(--ink); -webkit-font-smoothing: antialiased;
       }
-
-      #root {
-        min-height: 100vh;
-      }
-
-      @keyframes marquee {
-        0% {
-          transform: translateX(0);
-        }
-
-        100% {
-          transform: translateX(-50%);
-        }
-      }
-
-      @keyframes floatY {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-
-        50% {
-          transform: translateY(-12px);
-        }
-      }
+      @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
   </head>
   <body>
     <div id="root"></div>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script
-      type="text/babel"
-      data-type="module"
-      data-presets="react"
-    >
+    <script type="text/babel" data-type="module" data-presets="react">
 import React from "react";
 import { createRoot } from "react-dom/client";
-import {
-  Activity,
-  ArrowLeft,
-  BadgeCheck,
-  Bell,
-  CalendarDays,
-  Camera,
-  CheckCircle2,
-  ChevronRight,
-  CreditCard,
-  Crown,
-  FileText,
-  Heart,
-  Home,
-  Menu,
-  QrCode,
-  Search,
-  Sparkles,
-  Star,
-  Ticket,
-  Trophy,
-  User,
-} from "lucide-react";
+import { Activity, ArrowLeft, BadgeCheck, Bell, ChevronRight, Heart, Home, Search, Ticket, User, MapPin, Waves, Trees, Building2, QrCode, CheckCircle2, Crown, Star, Camera, Activity as ActivityIcon, Trophy, CalendarDays, CreditCard } from "lucide-react";
+
+// --- データ定義 ---
+const facilities = [
+  { id: "mirai-aqua", name: "ミライ水族館", category: "aquarium", location: "湾岸エリア" },
+  { id: "deep-blue", name: "ディープブルー・シー", category: "aquarium", location: "海岬市" },
+  { id: "savanna-forest", name: "サバンナの森動物園", category: "zoo", location: "丘陵エリア" },
+  { id: "sky-garden", name: "スカイガーデン・パーク", category: "zoo", location: "高原市" },
+];
 
 const animals = [
-  {
-    id: "penguin",
-    name: "ペンギン",
-    nickname: "ユキ",
-    location: "極地の海エリア",
-    price: 500,
-    badge: "人気の推し",
-
-    tones: "from-slate-950 via-sky-800 to-cyan-400",
-    facts: [
-      { label: "生息地", value: "南極・亜南極地域" },
-      { label: "食べもの", value: "魚・オキアミなど" },
-      { label: "体長", value: "約60〜90cm" },
-      { label: "性格", value: "好奇心旺盛で社交的" },
-    ],
-    summary:
-      "冷たい海を元気に泳ぎ回る人気者。毎日の体重や羽の状態を見守りながら、健康管理と環境整備を支えられます。",
-  },
-  {
-    id: "otter",
-    name: "ラッコ",
-    nickname: "モチ",
-    location: "海獣ひろば",
-    price: 800,
-    badge: "一緒に暮らす仲間たち",
-
-    tones: "from-[#0f2137] via-[#365d7d] to-[#8ed5de]",
-    facts: [
-      { label: "生息地", value: "北太平洋沿岸" },
-      { label: "食べもの", value: "貝・ウニ・甲殻類" },
-      { label: "体長", value: "約1.2m" },
-      { label: "性格", value: "繊細で遊び好き" },
-    ],
-    summary:
-      "海藻に包まれて浮かぶ姿が愛らしいラッコ。給餌や健康観察に加え、保全のための研究活動も応援できます。",
-  },
-  {
-    id: "dolphin",
-    name: "イルカ",
-    nickname: "ソラ",
-    location: "オーシャンスタジアム",
-    price: 1000,
-    badge: "知能の高い人気者",
-
-    tones: "from-[#072847] via-[#1b5ea8] to-[#67c9ff]",
-    facts: [
-      { label: "生息地", value: "温帯〜熱帯の沿岸" },
-      { label: "食べもの", value: "魚・イカ" },
-      { label: "体長", value: "約2〜3m" },
-      { label: "性格", value: "活発で学習能力が高い" },
-    ],
-    summary:
-      "群れでのコミュニケーションが得意なイルカ。トレーニングやエンリッチメントの様子をレポートで追いかけられます。",
-  },
-  {
-    id: "lion",
-    name: "ライオン",
-    nickname: "レオ",
-    location: "サバンナガーデン",
-    price: 1000,
-    badge: "堂々たる王者",
-
-    tones: "from-[#2f1606] via-[#8c4b16] to-[#f4be63]",
-    facts: [
-      { label: "生息地", value: "アフリカの草原" },
-      { label: "食べもの", value: "肉食" },
-      { label: "体長", value: "約1.8〜2.5m" },
-      { label: "性格", value: "落ち着きがあり勇敢" },
-    ],
-    summary:
-      "大きなたてがみが魅力のライオン。休息時間や群れでの行動を観察しながら、飼育環境の改善を後押しできます。",
-  },
-];
-
-const supportPlans = [
-  {
-    id: "starter",
-    amount: 500,
-    label: "500円 / 月",
-    title: "気軽に応援プラン",
-    perks: "毎月のレポート / 写真 / 会員証",
-    recommended: true,
-  },
-  {
-    id: "grow",
-    amount: 1000,
-    label: "1,000円 / 月",
-    title: "しっかり見守りプラン",
-    perks: "月次まとめ / 限定先行レポート / 応援コメント",
-  },
-  {
-    id: "impact",
-    amount: 3000,
-    label: "3,000円 / 月",
-    title: "特別サポータープラン",
-    perks: "限定イベント / バックヤード抽選 / 保全アップデート",
-  },
-];
-
-const homeBenefits = [
-  {
-    icon: Heart,
-    title: "月額500円から応援",
-    text: "気軽に始めて、毎月の継続支援につなげられます。",
-  },
-  {
-    icon: Camera,
-    title: "活動レポート",
-    text: "写真や近況メモで、毎日の変化を追いかけられます。",
-  },
-  {
-    icon: Ticket,
-    title: "会員特典",
-    text: "限定イベントや会員証で、現地体験も深まります。",
-  },
+  { id: "penguin-1", facilityId: "mirai-aqua", type: "penguin", name: "ペンギン", nickname: "ユキ", price: 500, tones: "from-slate-950 via-sky-800 to-cyan-400", summary: "ミライ水族館の人気者。光の演出に合わせて元気に泳ぎます。" },
+  { id: "otter-1", facilityId: "mirai-aqua", type: "otter", name: "カワウソ", nickname: "キラ", price: 800, tones: "from-amber-900 via-orange-800 to-yellow-600", summary: "器用に手を使って遊ぶ、好奇心旺盛なカワウソ。" },
+  { id: "dolphin-1", facilityId: "deep-blue", type: "dolphin", name: "イルカ", nickname: "ソラ", price: 1000, tones: "from-[#072847] via-[#1b5ea8] to-[#67c9ff]", summary: "深い青のプールで優雅に舞う、知能の高いイルカ。" },
+  { id: "penguin-2", facilityId: "deep-blue", type: "penguin", name: "ペンギン", nickname: "ハル", price: 500, tones: "from-slate-800 via-blue-900 to-indigo-500", summary: "深い海の底をイメージした展示で暮らすペンギン。" },
+  { id: "lion-1", facilityId: "savanna-forest", type: "lion", name: "ライオン", nickname: "レオ", price: 1000, tones: "from-[#2f1606] via-[#8c4b16] to-[#f4be63]", summary: "サバンナの王者にふさわしい、堂々とした風格。" },
+  { id: "otter-2", facilityId: "savanna-forest", type: "otter", name: "コツメカワウソ", nickname: "モチ", price: 800, tones: "from-[#0f2137] via-[#365d7d] to-[#8ed5de]", summary: "森の川辺で仲良く暮らす、家族思いのカワウソ。" },
+  { id: "lion-2", facilityId: "sky-garden", type: "lion", name: "ライオン", nickname: "シンバ", price: 1000, tones: "from-orange-950 via-red-900 to-amber-600", summary: "高原の風を感じながら、のんびりと過ごすライオン。" },
+  { id: "dolphin-2", facilityId: "sky-garden", type: "dolphin", name: "イルカ", nickname: "ルナ", price: 1000, tones: "from-blue-950 via-indigo-800 to-purple-500", summary: "空を飛ぶように泳ぐ、ダイナミックなジャンプが自慢。" },
 ];
 
 const reports = [
-  {
-    id: "report-1",
-    animalId: "penguin",
-    category: "写真",
-    date: "2026.05.01",
-    title: "ペンギンの体重チェックを行いました",
-    excerpt: "体重は先月比で安定。食欲もあり、羽の状態も良好でした。",
-    body:
-      "朝の健康チェックでは、体重・歩行・羽毛の状態を確認しました。給餌の反応も良く、泳ぎの姿勢も安定しています。夕方には氷のおもちゃに夢中になる様子も見られ、環境エンリッチメントの効果が出ています。",
-  },
-  {
-    id: "report-2",
-    animalId: "otter",
-    category: "記録",
-    date: "2026.04.15",
-    title: "朝の給餌を観察しました",
-    excerpt: "貝を上手に割って食べる様子と、水面でのリラックス行動を記録。",
-    body:
-      "ラッコのモチは朝の給餌でお気に入りの貝を選び、何度も回転しながら上手に割って食べていました。食後は海藻に包まれて休み、ストレス指標も安定しています。",
-  },
-  {
-    id: "report-3",
-    animalId: "dolphin",
-    category: "写真",
-    date: "2026.04.08",
-    title: "プール下の様子を観察しました",
-    excerpt: "仲間同士の追いかけっこが見られ、活発な一日でした。",
-    body:
-      "イルカたちは午前中から活発に泳ぎ、スタッフの合図に合わせて複数のターゲットトレーニングを成功させました。午後は群れでの遊泳が増え、観察日誌にも多くの記録が残りました。",
-  },
-  {
-    id: "report-4",
-    animalId: "penguin",
-    category: "お知らせ",
-    date: "2026.04.05",
-    title: "新しいおもちゃで遊びました",
-    excerpt: "好奇心いっぱいに氷のトンネルへ飛び込む姿が見られました。",
-    body:
-      "新しい氷のトンネルを設置したところ、ペンギンたちは入れ替わりで中を通り抜け、しばらく周囲を泳ぎ続けていました。行動バリエーションを増やす良いきっかけになっています。",
-  },
-  {
-    id: "report-5",
-    animalId: "lion",
-    category: "記録",
-    date: "2026.03.29",
-    title: "午後の休息行動を観察しました",
-    excerpt: "日陰でゆっくり過ごしながら、群れの位置関係を安定して保っていました。",
-    body:
-      "ライオンたちは気温の高い時間帯に木陰へ移動し、交代で周囲を見渡しながら落ち着いて休んでいました。水場への移動もスムーズで、群れとして安定した行動が見られています。",
-  },
+  { id: "r1", animalId: "penguin-1", category: "写真", date: "2026.06.28", title: "朝の体重チェック", excerpt: "今朝も元気に体重測定。安定した健康状態です。" },
+  { id: "r2", animalId: "lion-1", category: "記録", date: "2026.06.25", title: "新しい遊具を導入", excerpt: "ライオンたちが新しいおもちゃに興味津々です。" },
+  { id: "r3", animalId: "otter-1", category: "写真", date: "2026.06.20", title: "お昼寝の様子", excerpt: "仲間と身を寄せ合って眠る愛らしい姿。" },
 ];
 
-const notifications = [
-  {
-    id: "notice-1",
-    kind: "お知らせ",
-    date: "2026.06.02",
-    title: "ペンギンの赤ちゃんが誕生しました",
-    excerpt: "記念フォトと飼育員コメントを公開しています。",
-    animalId: "penguin",
-    unread: true,
-  },
-  {
-    id: "notice-2",
-    kind: "イベント",
-    date: "2026.05.20",
-    title: "バックヤードツアーの募集を開始しました",
-    excerpt: "会員向け先行受付がスタートしました。",
-    animalId: "penguin",
-    unread: true,
-  },
-  {
-    id: "notice-3",
-    kind: "お知らせ",
-    date: "2026.05.01",
-    title: "限定イベントのお知らせ",
-    excerpt: "応援ランクに応じて参加できる限定企画です。",
-    animalId: "otter",
-    unread: false,
-  },
-  {
-    id: "notice-4",
-    kind: "メンテナンス",
-    date: "2026.04.23",
-    title: "メンテナンスに伴う一時停止のお知らせ",
-    excerpt: "6月20日 2:00〜4:00 は一部機能を停止します。",
-    animalId: "dolphin",
-    unread: false,
-  },
+const supportPlans = [
+  { id: "starter", amount: 500, label: "500円 / 月", title: "気軽に応援プラン", perks: "毎月のレポート / 写真 / 会員証", recommended: true },
+  { id: "grow", amount: 1000, label: "1,000円 / 月", title: "しっかり見守りプラン", perks: "月次まとめ / 限定先行レポート" },
 ];
 
-const rankingRows = {
-  "今月": [
-    { rank: 1, animalId: "penguin", value: "3,250,000円" },
-    { rank: 2, animalId: "otter", value: "2,180,000円" },
-    { rank: 3, animalId: "lion", value: "1,850,000円" },
-    { rank: 4, animalId: "dolphin", value: "1,620,000円" },
-  ],
-  "先月": [
-    { rank: 1, animalId: "otter", value: "2,960,000円" },
-    { rank: 2, animalId: "penguin", value: "2,520,000円" },
-    { rank: 3, animalId: "dolphin", value: "1,740,000円" },
-    { rank: 4, animalId: "lion", value: "1,430,000円" },
-  ],
-  "累計": [
-    { rank: 1, animalId: "penguin", value: "12,560,000円" },
-    { rank: 2, animalId: "otter", value: "10,120,000円" },
-    { rank: 3, animalId: "dolphin", value: "8,420,000円" },
-    { rank: 4, animalId: "lion", value: "7,860,000円" },
-  ],
-};
-
-const supporterVoices = [
-  {
-    id: "voice-1",
-    name: "ペンギンが元気に育ってくれて嬉しい！",
-    meta: "20代・女性",
-  },
-  {
-    id: "voice-2",
-    name: "ラッコの仕草にいつも癒やされています",
-    meta: "30代・男性",
-  },
-  {
-    id: "voice-3",
-    name: "家族で応援しています！ これからも楽しみ",
-    meta: "40代・夫婦",
-  },
-];
-
-const events = [
-  {
-    id: "event-1",
-    title: "バックヤードツアー",
-    date: "2026.07.12 (土) 10:00〜11:30",
-    place: "海獣エリア裏側",
-    capacity: "20名",
-    fee: "会員限定 無料",
-    animalId: "penguin",
-    summary:
-      "普段は入れない飼育エリアを案内。朝の準備や健康管理の様子を見学できます。",
-  },
-  {
-    id: "event-2",
-    title: "飼育員のお仕事体験",
-    date: "2026.07.20 (月) 13:00〜14:30",
-    place: "オーシャンスタジアム",
-    capacity: "10名",
-    fee: "2,000円",
-    animalId: "dolphin",
-    summary:
-      "トレーニング器具の紹介や給餌の準備を体験。子どもも参加しやすいプログラムです。",
-  },
-  {
-    id: "event-3",
-    title: "夜の水族館ウォッチング",
-    date: "2026.08.10 (土) 18:30〜20:00",
-    place: "メイン館内",
-    capacity: "30名",
-    fee: "1,500円",
-    animalId: "otter",
-    summary:
-      "夜ならではの落ち着いた表情や、眠る前の行動をゆっくり観察できます。",
-  },
-];
-
-const desktopFeatures = [
-  {
-    icon: CreditCard,
-    title: "会員証から現地体験まで一続き",
-    text: "オンライン支援と来園体験を同じ世界観でつなげています。",
-  },
-  {
-    icon: FileText,
-    title: "活動レポートで応援の意味が見える",
-    text: "健康記録や写真更新を一本のストーリーとして追えます。",
-  },
-  {
-    icon: Sparkles,
-    title: "継続したくなる軽やかな動線",
-    text: "支援、通知、ランキング、イベントまで自然につながります。",
-  },
-];
-
-const experienceFlow = [
-  "気になる生き物を見つける",
-  "詳細を読んで魅力を知る",
-  "プランを選んで応援する",
-  "活動レポートで成長を追う",
-  "会員証やイベントで関係を深める",
-];
-
-const tabItems = [
-  { key: "home", label: "ホーム", icon: Home },
-  { key: "discover", label: "さがす", icon: Search },
-  { key: "reports", label: "レポート", icon: Activity },
-  { key: "member", label: "会員証", icon: Ticket },
-  { key: "mypage", label: "マイページ", icon: User },
-];
-
-function classNames(...values) {
-  return values.filter(Boolean).join(" ");
-}
-
-function findAnimal(id) {
-  return animals.find((animal) => animal.id === id);
-}
-
-function formatImageUrl(animalId) {
+// --- 共通コンポーネント ---
+function classNames(...values) { return values.filter(Boolean).join(" "); }
+function findAnimal(id) { return animals.find(a => a.id === id); }
+function findFacility(id) { return facilities.find(f => f.id === id); }
+function formatYen(v) { return `${v.toLocaleString("ja-JP")}円`; }
+function formatImageUrl(type) {
   const urls = {
     penguin: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/iMxoACEWDIwJDZap.jpg",
     otter: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/nxNgSWdlEwjUoHyb.jpg",
     dolphin: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/lQIBXQWAeqilFEVm.jpg",
     lion: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/mRuBUjzsnVydBUZm.jpg",
   };
-  return urls[animalId];
-}
-
-function formatYen(value) {
-  return `${value.toLocaleString("ja-JP")}円`;
-}
-
-function ScreenBase({ children, className = "", bottomNav }) {
-  return (
-    <div className={classNames("relative h-full overflow-hidden", className)}>
-      <div
-        className={classNames(
-          "h-full overflow-y-auto px-4 pt-4",
-          bottomNav ? "pb-28" : "pb-8",
-        )}
-      >
-        {children}
-      </div>
-      {bottomNav}
-    </div>
-  );
+  return urls[type] || urls.penguin;
 }
 
 function PhoneFrame({ children }) {
   return (
-    <div className="w-full max-w-[408px] rounded-[44px] border border-white/40 bg-white/65 p-2 shadow-[0_40px_120px_rgba(6,24,46,0.18)] backdrop-blur md:p-3">
-      <div className="relative aspect-[390/844] overflow-hidden rounded-[34px] border border-white/70 bg-white">
-        {children}
-      </div>
+    <div className="w-full max-w-[408px] rounded-[44px] border border-white/40 bg-white/65 p-2 shadow-2xl backdrop-blur">
+      <div className="relative aspect-[390/844] overflow-hidden rounded-[34px] border border-white/70 bg-white">{children}</div>
     </div>
   );
 }
 
 function StatusBar({ light = false }) {
   return (
-    <div
-      className={classNames(
-        "flex items-center justify-between text-[11px] font-black",
-        light ? "text-slate-900" : "text-white",
-      )}
-    >
+    <div className={classNames("flex items-center justify-between px-6 pt-4 text-[11px] font-black", light ? "text-slate-900" : "text-white")}>
       <span>9:41</span>
-      <div className="flex items-center gap-1">
-        <span className="h-2 w-2 rounded-full bg-current opacity-80" />
-        <span className="h-2 w-2 rounded-full bg-current opacity-80" />
-        <span className="rounded-full border border-current/40 px-1.5 py-0.5 text-[10px]">
-          100
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function ScreenHeader({ title, subtitle, onBack, right, light = true }) {
-  return (
-    <div className="mt-4 flex items-start justify-between gap-3">
-      <div className="flex min-w-0 items-start gap-3">
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className={classNames(
-              "mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full border",
-              light
-                ? "border-slate-200 bg-white text-slate-700"
-                : "border-white/15 bg-white/10 text-white",
-            )}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-        ) : null}
-        <div className="min-w-0">
-          <div
-            className={classNames(
-              "text-2xl font-black tracking-[-0.04em]",
-              light ? "text-[#10233c]" : "text-white",
-            )}
-          >
-            {title}
-          </div>
-          {subtitle ? (
-            <div
-              className={classNames(
-                "mt-1 text-xs leading-6",
-                light ? "text-slate-500" : "text-slate-200",
-              )}
-            >
-              {subtitle}
-            </div>
-          ) : null}
-        </div>
-      </div>
-      {right}
-    </div>
-  );
-}
-
-function SurfaceCard({ children, dark = false, className = "" }) {
-  return (
-    <div
-      className={classNames(
-        "rounded-[24px] border p-4",
-        dark
-          ? "border-white/10 bg-white/10 text-white backdrop-blur"
-          : "border-slate-200 bg-white text-[#11284f] shadow-[0_18px_48px_rgba(17,40,79,0.08)]",
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-function PrimaryButton({ children, className = "", ...props }) {
-  return (
-    <button
-      type="button"
-      className={classNames(
-        "inline-flex items-center justify-center rounded-[18px] bg-[#1656d9] px-4 py-3 text-sm font-black text-white shadow-[0_18px_34px_rgba(22,86,217,0.28)] transition hover:brightness-110",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
-function SecondaryButton({ children, className = "", ...props }) {
-  return (
-    <button
-      type="button"
-      className={classNames(
-        "inline-flex items-center justify-center rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#1656d9] transition hover:border-[#1656d9]",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
-function FilterTabs({ items, active, onSelect, dark = false }) {
-  return (
-    <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-      {items.map((item) => {
-        const isActive = item === active;
-        return (
-          <button
-            key={item}
-            type="button"
-            onClick={() => onSelect(item)}
-            className={classNames(
-              "shrink-0 rounded-full px-4 py-2 text-[11px] font-black",
-              isActive
-                ? dark
-                  ? "bg-white text-[#10233c]"
-                  : "bg-[#173e72] text-white"
-                : dark
-                  ? "bg-white/10 text-white"
-                  : "bg-[#eff5ff] text-[#1656d9]",
-            )}
-          >
-            {item}
-          </button>
-        );
-      })}
+      <div className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-current" /><span className="h-2 w-2 rounded-full bg-current" /></div>
     </div>
   );
 }
 
 function BottomNav({ active, onSelect }) {
+  const items = [
+    { key: "home", label: "ホーム", icon: Home },
+    { key: "discover", label: "さがす", icon: Search },
+    { key: "reports", label: "レポート", icon: ActivityIcon },
+    { key: "member", label: "会員証", icon: Ticket },
+    { key: "mypage", label: "マイページ", icon: User },
+  ];
   return (
-    <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white/92 px-4 pb-5 pt-3 backdrop-blur">
+    <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white/92 px-4 pb-5 pt-3 backdrop-blur z-50">
       <div className="grid grid-cols-5 gap-2">
-        {tabItems.map((item) => {
-          const isActive = item.key === active;
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => onSelect(item.key)}
-              className={classNames(
-                "rounded-2xl px-2 py-2 text-center transition",
-                isActive ? "bg-[#eaf1ff] text-[#1656d9]" : "text-slate-500",
-              )}
-            >
-              <Icon className="mx-auto h-4 w-4" />
-              <div className="mt-1 text-[10px] font-black tracking-[-0.02em]">
-                {item.label}
+        {items.map((item) => (
+          <button key={item.key} onClick={() => onSelect(item.key)} className={classNames("rounded-2xl px-2 py-2 text-center transition", item.key === active ? "bg-[#eaf1ff] text-[#1656d9]" : "text-slate-500")}>
+            <item.icon className="mx-auto h-4 w-4" />
+            <div className="mt-1 text-[10px] font-black">{item.label}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArtCanvas({ animal, label, compact = false }) {
+  return (
+    <div className={classNames("relative overflow-hidden rounded-[24px] bg-gradient-to-br", animal.tones, compact ? "h-24" : "h-48")}>
+      <img src={formatImageUrl(animal.type)} className={classNames("absolute object-cover animate-[floatY_8s_ease-in-out_infinite]", compact ? "bottom-2 right-2 h-16 w-16" : "bottom-4 right-4 h-32 w-32")} />
+      <div className="absolute inset-x-3 bottom-3"><div className="inline-flex rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur">{label}</div></div>
+    </div>
+  );
+}
+
+function ScreenHeader({ title, subtitle, onBack, light = true }) {
+  return (
+    <div className="mt-4 flex items-start gap-3 px-4 mb-6">
+      {onBack && <button onClick={onBack} className={classNames("mt-1 h-8 w-8 rounded-full border flex items-center justify-center transition", light ? "border-slate-200 bg-white text-slate-700 active:bg-slate-50" : "border-white/10 bg-white/10 text-white active:bg-white/20")}><ArrowLeft className="h-4 w-4" /></button>}
+      <div className="min-w-0">
+        <div className={classNames("text-xl font-black truncate", light ? "text-[#10233c]" : "text-white")}>{title}</div>
+        {subtitle && <div className={classNames("text-[11px] font-bold mt-0.5", light ? "text-slate-500" : "text-slate-300")}>{subtitle}</div>}
+      </div>
+    </div>
+  );
+}
+
+function SurfaceCard({ children, className = "", dark = false }) {
+  return (
+    <div className={classNames("rounded-[24px] border p-4 shadow-sm", dark ? "bg-white/10 border-white/10 text-white backdrop-blur" : "bg-white border-slate-200 text-[#11284f]", className)}>
+      {children}
+    </div>
+  );
+}
+
+// --- 各画面コンポーネント ---
+
+function HomeScreen({ selectedAnimal, onSelectAnimal, onTabSelect }) {
+  return (
+    <div className="h-full bg-[linear-gradient(180deg,#08203b_0%,#10375e_100%)] text-white overflow-y-auto pb-24 hide-scrollbar">
+      <StatusBar />
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between">
+          <div className="text-xl font-black tracking-tight">Aqzoo</div>
+          <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center border border-white/10"><Bell className="h-4 w-4" /></div>
+        </div>
+        <div className="mt-8 p-6 rounded-[32px] bg-white/10 border border-white/10 backdrop-blur shadow-xl">
+          <div className="text-3xl font-black leading-tight">あなたの「推し」を、<br/>毎月応援できる。</div>
+          <button onClick={() => onTabSelect("discover")} className="mt-6 w-full bg-white text-[#08203b] py-3.5 rounded-[18px] font-black text-sm shadow-lg active:scale-95 transition">生きものを探す</button>
+        </div>
+        <div className="mt-8"><ArtCanvas animal={selectedAnimal} label={`${selectedAnimal.nickname} の近況`} /></div>
+        <div className="mt-8 grid grid-cols-2 gap-3">
+          {animals.slice(0, 4).map(a => (
+            <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="text-left rounded-[24px] bg-white/5 border border-white/5 p-2 backdrop-blur transition active:scale-95">
+              <ArtCanvas animal={a} label={a.name} compact />
+              <div className="mt-2 px-1">
+                <div className="text-[11px] font-black truncate">{findFacility(a.facilityId)?.name}</div>
+                <div className="text-[9px] text-slate-400 mt-0.5">{formatYen(a.price)} / 月〜</div>
               </div>
             </button>
+          ))}
+        </div>
+      </div>
+      <BottomNav active="home" onSelect={onTabSelect} />
+    </div>
+  );
+}
+
+function DiscoverScreen({ step, category, facilityId, onSelectCategory, onSelectFacility, onSelectAnimal, onTabSelect, onBack }) {
+  const filteredFacilities = facilities.filter(f => f.category === category);
+  const filteredAnimals = animals.filter(a => a.facilityId === facilityId);
+  
+  const bgClass = category === "aquarium" ? "bg-[linear-gradient(180deg,#004e92_0%,#000428_100%)]" : category === "zoo" ? "bg-[linear-gradient(180deg,#134e5e_0%,#71b280_100%)]" : "bg-[#f7fbff]";
+
+  return (
+    <div className={classNames("h-full pb-24 overflow-y-auto hide-scrollbar transition-colors duration-500", bgClass)}>
+      <StatusBar light={!category} />
+      <ScreenHeader title={step === "category" ? "さがす" : step === "facility" ? (category === "aquarium" ? "水族館を選ぶ" : "動物園を選ぶ") : findFacility(facilityId)?.name} subtitle={step === "category" ? "施設の種類から選ぶ" : step === "facility" ? "気になる施設を選んでください" : "この施設で暮らす仲間たち"} onBack={onBack} light={!category} />
+      <div className="px-4">
+        {step === "category" && (
+          <div className="grid gap-4 mt-4">
+            <button onClick={() => onSelectCategory("aquarium")} className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-600 to-cyan-400 p-6 text-left text-white shadow-lg active:scale-95 transition"><Waves className="absolute -right-4 -top-4 h-32 w-32 opacity-20" /><div className="text-2xl font-black">水族館</div></button>
+            <button onClick={() => onSelectCategory("zoo")} className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-emerald-600 to-lime-400 p-6 text-left text-white shadow-lg active:scale-95 transition"><Trees className="absolute -right-4 -top-4 h-32 w-32 opacity-20" /><div className="text-2xl font-black">動物園</div></button>
+          </div>
+        )}
+        {step === "facility" && (
+          <div className="grid gap-3">
+            {filteredFacilities.map(f => (
+              <button key={f.id} onClick={() => onSelectFacility(f.id)} className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-5 text-left backdrop-blur-md text-white shadow-xl active:scale-95 transition">
+                <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center"><Building2 className="h-6 w-6" /></div>
+                <div className="flex-1 min-w-0"><div className="text-base font-black">{f.name}</div><div className="mt-1 flex items-center gap-1 text-[11px] opacity-70"><MapPin className="h-3 w-3" />{f.location}</div></div>
+                <ChevronRight className="h-5 w-5 opacity-40" />
+              </button>
+            ))}
+          </div>
+        )}
+        {step === "animal" && (
+          <div className="grid gap-4">
+            {filteredAnimals.map(a => (
+              <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-4 text-left backdrop-blur-md text-white shadow-xl active:scale-95 transition">
+                <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-black text-cyan-200 uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
+                  <div className="mt-1 text-lg font-black leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <BottomNav active="discover" onSelect={onTabSelect} />
+    </div>
+  );
+}
+
+function ReportsScreen({ onTabSelect }) {
+  return (
+    <div className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar">
+      <StatusBar light />
+      <ScreenHeader title="活動レポート" subtitle="写真、記録、近況を追えます。" />
+      <div className="px-4 grid gap-4">
+        {reports.map(r => {
+          const a = findAnimal(r.animalId);
+          return (
+            <SurfaceCard key={r.id} className="flex gap-4 p-5">
+              <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[9px] font-black text-[#5a78b5] uppercase tracking-widest">{r.category} • {r.date}</div>
+                <div className="mt-1 text-sm font-black text-[#11284f]">{r.title}</div>
+                <p className="mt-1 text-[11px] text-slate-500 leading-relaxed">{r.excerpt}</p>
+              </div>
+            </SurfaceCard>
           );
         })}
       </div>
+      <BottomNav active="reports" onSelect={onTabSelect} />
     </div>
   );
 }
 
-function ArtCanvas({ animal, label, detail, compact = false }) {
+function MemberScreen({ supportedAnimalId, onTabSelect }) {
+  const animal = findAnimal(supportedAnimalId) || animals[0];
+  const facility = findFacility(animal.facilityId);
   return (
-    <div
-      className={classNames(
-        "relative overflow-hidden rounded-[28px] bg-gradient-to-br",
-        animal.tones,
-        compact ? "h-24" : "h-64",
-      )}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.28),transparent_34%)]" />
-      <div className="absolute left-[-28px] top-10 h-28 w-28 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute right-[-20px] top-8 h-24 w-24 rounded-full bg-cyan-200/25 blur-3xl" />
-        <img
-          src={formatImageUrl(animal.id)}
-          alt={animal.name}
-          className={classNames(
-            "absolute object-cover drop-shadow-[0_18px_32px_rgba(0,0,0,0.25)] animate-[floatY_8s_ease-in-out_infinite]",
-            compact ? "bottom-3 right-3 h-20 w-20" : "bottom-10 right-6 h-40 w-40",
-          )}
-        />
-      <div
-        className="absolute left-5 top-5 h-14 w-14 rounded-full border border-white/18 bg-white/10 blur-xl animate-[floatY_11s_ease-in-out_infinite]"
-        style={{ animationDelay: "-2s" }}
-      />
-      <div
-        className="absolute left-16 top-20 h-4 w-4 rounded-full bg-white/30 animate-[floatY_9s_ease-in-out_infinite]"
-        style={{ animationDelay: "-4s" }}
-      />
-      <div className="absolute inset-x-4 bottom-4">
-        <div className="inline-flex rounded-full border border-white/18 bg-white/10 px-3 py-1 text-[10px] font-black text-white/95 backdrop-blur">
-          {label}
-        </div>
-        {detail ? (
-          <div className="mt-3 max-w-[70%] text-sm font-black text-white">
-            {detail}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function DetailRow({ label, value }) {
-  return (
-    <div className="rounded-[18px] border border-slate-100 bg-slate-50 px-3 py-3">
-      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-        {label}
-      </div>
-      <div className="mt-2 text-sm font-black text-[#11284f]">{value}</div>
-    </div>
-  );
-}
-
-function MenuRow({ icon: Icon, label, value, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center justify-between rounded-[20px] border border-slate-200 bg-white px-4 py-4 text-left shadow-[0_16px_40px_rgba(17,40,79,0.06)]"
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eff5ff] text-[#1656d9]">
-          <Icon className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="text-sm font-black text-[#11284f]">{label}</div>
-          {value ? <div className="mt-1 text-[11px] text-slate-500">{value}</div> : null}
-        </div>
-      </div>
-      <ChevronRight className="h-4 w-4 text-slate-400" />
-    </button>
-  );
-}
-
-function HomeScreen({
-  selectedAnimal,
-  notificationCount,
-  supported,
-  onSelectAnimal,
-  onOpenSupport,
-  onOpenReports,
-  onOpenRankings,
-  onOpenEvents,
-  onOpenNotifications,
-  onTabSelect,
-}) {
-  return (
-    <ScreenBase
-      className="bg-[linear-gradient(180deg,#08203b_0%,#10375e_36%,#0f2946_100%)] text-white"
-      bottomNav={<BottomNav active="home" onSelect={onTabSelect} />}
-    >
-      <div className="absolute left-[-40px] top-24 h-44 w-44 rounded-full bg-cyan-300/12 blur-3xl" />
-      <div className="absolute right-[-50px] top-6 h-44 w-44 rounded-full bg-blue-400/16 blur-3xl" />
-      <StatusBar />
-
-      <div className="mt-4 flex items-center justify-between">
-        <div className="text-xl font-black tracking-[-0.04em]">Aqzoo</div>
-        <div className="flex items-center gap-2 text-slate-100">
-          <button
-            type="button"
-            onClick={onOpenNotifications}
-            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/10"
-          >
-            <Bell className="h-4 w-4" />
-            {notificationCount > 0 ? (
-              <span className="absolute -right-1 -top-1 rounded-full bg-[#ff8b72] px-1.5 py-0.5 text-[9px] font-black text-white">
-                {notificationCount}
-              </span>
-            ) : null}
-          </button>
-          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/10">
-            <Menu className="h-4 w-4" />
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-4">
-        <SurfaceCard dark className="overflow-hidden p-0">
-          <div className="grid gap-4 p-5">
-            <div>
-              <div className="max-w-[240px] text-[2rem] font-black leading-[1.12] tracking-[-0.05em]">
-                あなたの「推し」を、
-                <br />
-                毎月応援できる。
-              </div>
-              <p className="mt-3 max-w-[260px] text-xs leading-6 text-slate-200">
-                水族館・動物園の生き物を、日々のレポートと一緒にやさしく見守るアプリです。
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onOpenSupport}
-              className="inline-flex w-full items-center justify-center rounded-[18px] bg-white px-4 py-3 text-sm font-black text-[#0f2946]"
-            >
-              今すぐ応援する
-            </button>
-          </div>
-          <div className="px-4 pb-4">
-            <ArtCanvas
-              animal={selectedAnimal}
-              label={`${selectedAnimal.nickname} の近況`}
-              detail={`${supported ? "応援中" : "おすすめ"} • ${formatYen(selectedAnimal.price)} / 月から`}
-            />
-          </div>
-        </SurfaceCard>
-
-        <div className="grid grid-cols-4 gap-2">
-          {animals.map((animal) => (
-            <button
-              key={animal.id}
-              type="button"
-              onClick={() => onSelectAnimal(animal.id)}
-              className={classNames(
-                "rounded-[20px] border bg-white/10 p-2 text-left backdrop-blur transition",
-                animal.id === selectedAnimal.id
-                  ? "border-cyan-200 shadow-[0_14px_30px_rgba(126,241,255,0.18)]"
-                  : "border-white/10",
-              )}
-            >
-              <ArtCanvas animal={animal} label={animal.name} compact />
-              <div className="mt-2 text-[11px] font-black">{animal.name}</div>
-              <div className="mt-1 text-[10px] text-slate-300">
-                {formatYen(animal.price)} / 月から
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <div className="grid gap-2">
-          {homeBenefits.map((benefit) => (
-            <SurfaceCard key={benefit.title} dark className="rounded-[20px] px-4 py-3">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/12 text-cyan-100">
-                  <benefit.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-black">{benefit.title}</div>
-                  <div className="mt-1 text-[11px] leading-5 text-slate-200">
-                    {benefit.text}
-                  </div>
-                </div>
-              </div>
-            </SurfaceCard>
-          ))}
-        </div>
-
-        <SurfaceCard dark className="rounded-[24px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
-                今日の導線
-              </div>
-              <div className="mt-2 text-lg font-black">気になる情報へすぐ移動</div>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={onOpenReports}
-              className="rounded-[18px] bg-white/10 px-3 py-3 text-left text-[11px] font-black"
-            >
-              活動レポート
-            </button>
-            <button
-              type="button"
-              onClick={onOpenRankings}
-              className="rounded-[18px] bg-white/10 px-3 py-3 text-left text-[11px] font-black"
-            >
-              みんなの応援
-            </button>
-            <button
-              type="button"
-              onClick={onOpenEvents}
-              className="rounded-[18px] bg-white/10 px-3 py-3 text-left text-[11px] font-black"
-            >
-              体験イベント
-            </button>
-          </div>
-        </SurfaceCard>
-      </div>
-    </ScreenBase>
-  );
-}
-
-function DiscoverScreen({
-  animal,
-  supported,
-  followed,
-  onToggleFollow,
-  onOpenSupport,
-  onOpenReports,
-  onSelectAnimal,
-  onTabSelect,
-}) {
-  const relatedAnimals = animals.filter((item) => item.id !== animal.id).slice(0, 3);
-
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="discover" onSelect={onTabSelect} />}
-    >
+    <div className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar">
       <StatusBar light />
-      <ScreenHeader
-        title="生き物詳細"
-        subtitle="推しの魅力と支援導線をひとつの画面にまとめています。"
-        right={
-          <button
-            type="button"
-            onClick={onToggleFollow}
-            className={classNames(
-              "inline-flex h-10 w-10 items-center justify-center rounded-full border",
-              followed
-                ? "border-[#ffd2ca] bg-[#fff0ec] text-[#ff7f68]"
-                : "border-slate-200 bg-white text-slate-500",
-            )}
-          >
-            <Heart className={classNames("h-4 w-4", followed ? "fill-current" : "")} />
-          </button>
-        }
-      />
-
-      <div className="mt-4">
-        <ArtCanvas
-          animal={animal}
-          label={animal.location}
-          detail={`${animal.name} • ${formatYen(animal.price)} / 月`}
-        />
-      </div>
-
-      <div className="mt-4 flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="text-3xl font-black tracking-[-0.05em] text-[#10233c]">
-              {animal.name}
-            </div>
-            <BadgeCheck className="h-5 w-5 text-[#1656d9]" />
+      <ScreenHeader title="会員証" subtitle="応援プランの確認と現地特典" />
+      <div className="px-4">
+        <div className="rounded-[30px] bg-gradient-to-br from-[#08203b] via-[#143d70] to-[#081a30] p-7 text-white shadow-2xl relative overflow-hidden">
+          <div className="flex justify-between items-start">
+            <div><div className="text-2xl font-black">Aqzoo</div><div className="text-[10px] opacity-60 mt-1 uppercase tracking-widest">Supporter Card</div></div>
+            <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-[9px] font-black border border-emerald-500/30 text-emerald-400">ACTIVE</div>
           </div>
-          <div className="mt-2 text-sm font-bold text-slate-500">{animal.badge}</div>
-        </div>
-        <div className="rounded-full bg-[#eff5ff] px-3 py-2 text-[11px] font-black text-[#1656d9]">
-          {supported ? "応援中" : "募集中"}
-        </div>
-      </div>
-
-      <FilterTabs
-        items={["概要", "活動レポート", "ギャラリー"]}
-        active="概要"
-        onSelect={(tab) => {
-          if (tab === "活動レポート") onOpenReports();
-        }}
-      />
-
-      <SurfaceCard className="mt-4">
-        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-          概要
-        </div>
-        <div className="mt-3 text-sm leading-7 text-slate-600">{animal.summary}</div>
-      </SurfaceCard>
-
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        {animal.facts.map((fact) => (
-          <DetailRow key={fact.label} label={fact.label} value={fact.value} />
-        ))}
-      </div>
-
-      <div className="mt-5">
-        <div className="text-sm font-black text-[#11284f]">一緒に暮らす仲間たち</div>
-        <div className="mt-3 grid gap-3">
-          {relatedAnimals.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onSelectAnimal(item.id)}
-              className="flex items-center gap-3 rounded-[22px] border border-slate-200 bg-white p-3 text-left shadow-[0_12px_32px_rgba(17,40,79,0.06)]"
-            >
-              <div className="w-24 shrink-0">
-                <ArtCanvas animal={item} label={item.name} compact />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-black text-[#11284f]">{item.name}</div>
-                <div className="mt-1 text-[11px] text-slate-500">{formatYen(item.price)} / 月</div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </button>
-          ))}
+          <div className="mt-12 flex justify-between items-end">
+            <div><div className="text-xl font-black">山田 太郎</div><div className="text-[11px] opacity-60 mt-1">ID: AQZ-998822</div><div className="text-[11px] text-cyan-200 mt-3 font-black">{facility.name}の{animal.name}を応援中</div></div>
+            <div className="bg-white p-3 rounded-2xl text-[#08203b] shadow-xl"><QrCode className="h-12 w-12" /></div>
+          </div>
         </div>
       </div>
+      <BottomNav active="member" onSelect={onTabSelect} />
+    </div>
+  );
+}
 
-      <PrimaryButton className="mt-5 w-full" onClick={onOpenSupport}>
-        この子を応援する
-      </PrimaryButton>
-    </ScreenBase>
+function MyPageScreen({ followedAnimals, supportedAnimals, onSelectAnimal, onTabSelect }) {
+  return (
+    <div className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar">
+      <StatusBar light />
+      <ScreenHeader title="マイページ" subtitle="あなたのお気に入り・応援状況" />
+      <div className="px-4">
+        <div className="rounded-[32px] bg-gradient-to-br from-[#08203b] to-[#1656d9] p-6 text-white shadow-xl flex items-center gap-5">
+          <div className="h-16 w-16 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner"><User className="h-9 w-9" /></div>
+          <div><div className="text-xl font-black">山田 太郎さん</div><div className="text-[11px] opacity-70 mt-1">サポーター会員 ID: 000345</div></div>
+        </div>
+
+        {/* 応援中の生きものセクション */}
+        <div className="mt-10">
+          <div className="flex items-center justify-between mb-5">
+            <div className="text-xs font-black text-slate-400 uppercase tracking-widest">応援中の生きもの</div>
+            <div className="text-[10px] font-black text-[#1656d9] bg-[#eaf1ff] px-2 py-0.5 rounded-full">{supportedAnimals.length}件</div>
+          </div>
+          <div className="grid gap-4">
+            {supportedAnimals.length > 0 ? supportedAnimals.map(a => (
+              <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="flex items-center gap-4 rounded-[28px] border-2 border-[#1656d9] bg-white p-4 text-left shadow-md transition active:scale-[0.98]">
+                <div className="w-20 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-black text-[#1656d9] uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
+                  <div className="text-base font-black text-[#11284f] leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
+                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-black text-[#1656d9] bg-[#eaf1ff] px-2 py-0.5 rounded-full">応援中</div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-[#1656d9]" />
+              </button>
+            )) : <div className="p-8 text-center text-slate-400 text-xs font-bold border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50/50">応援中の生きものはいません</div>}
+          </div>
+        </div>
+
+        {/* 推しにしている生きものセクション */}
+        <div className="mt-10">
+          <div className="flex items-center justify-between mb-5">
+            <div className="text-xs font-black text-slate-400 uppercase tracking-widest">推しにしている生きもの</div>
+            <div className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{followedAnimals.length}件</div>
+          </div>
+          <div className="grid gap-4">
+            {followedAnimals.length > 0 ? followedAnimals.map(a => (
+              <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="flex items-center gap-4 rounded-[28px] border border-slate-200 bg-white p-4 text-left shadow-sm transition active:scale-[0.98]">
+                <div className="w-20 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-black text-[#1656d9] uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
+                  <div className="text-base font-black text-[#11284f] leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-slate-200" />
+              </button>
+            )) : <div className="p-8 text-center text-slate-400 text-xs font-bold border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50/50">推しの生きものはいません</div>}
+          </div>
+        </div>
+      </div>
+      <BottomNav active="mypage" onSelect={onTabSelect} />
+    </div>
+  );
+}
+
+function DetailScreen({ animal, followed, onToggleFollow, onOpenSupport, onBack }) {
+  const facility = findFacility(animal.facilityId);
+  return (
+    <div className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar">
+      <StatusBar light />
+      <ScreenHeader title="生き物詳細" subtitle={`${facility.name}の仲間`} onBack={onBack} />
+      <div className="px-4 mt-4">
+        <ArtCanvas animal={animal} label={facility.name} />
+        <div className="mt-6 flex items-start justify-between">
+          <div><div className="text-2xl font-black text-[#10233c] leading-tight">{facility.name}の<br/>{animal.name}</div><div className="mt-2 text-sm font-bold text-slate-500">{animal.nickname}</div></div>
+          <button onClick={onToggleFollow} className={classNames("h-12 w-12 rounded-full border flex items-center justify-center transition active:scale-90", followed ? "border-[#ffd2ca] bg-[#fff0ec] text-[#ff7f68] shadow-sm" : "border-slate-200 bg-white text-slate-400")}><Heart className={classNames("h-6 w-6", followed ? "fill-current" : "")} /></button>
+        </div>
+        <SurfaceCard className="mt-8 p-6 shadow-md"><div className="text-[10px] font-black text-[#5a78b5] uppercase tracking-widest mb-3">概要</div><p className="text-sm leading-7 text-slate-600">{animal.summary}</p></SurfaceCard>
+        <button onClick={onOpenSupport} className="mt-8 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-xl active:scale-95 transition">この子を応援する</button>
+      </div>
+    </div>
   );
 }
 
 function SupportScreen({ animal, selectedPlanId, onSelectPlan, onBack, onConfirm }) {
   return (
-    <ScreenBase className="bg-[#f7fbff]">
+    <div className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar">
       <StatusBar light />
-      <ScreenHeader
-        title="応援プランを選択"
-        subtitle={animal.name}
-        onBack={onBack}
-      />
-
-      <SurfaceCard className="mt-4 flex items-center gap-3">
-        <div className="w-24 shrink-0">
-          <ArtCanvas animal={animal} label={animal.name} compact />
-        </div>
-        <div>
-          <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
-          <div className="mt-1 text-[11px] text-slate-500">
-            継続応援で、毎月の活動を見守れます。
-          </div>
-        </div>
-      </SurfaceCard>
-
-      <div className="mt-4 grid gap-3">
-        {supportPlans.map((plan) => {
-          const selected = plan.id === selectedPlanId;
-          return (
-            <button
-              key={plan.id}
-              type="button"
-              onClick={() => onSelectPlan(plan.id)}
-              className={classNames(
-                "rounded-[24px] border p-4 text-left shadow-[0_16px_40px_rgba(17,40,79,0.06)]",
-                selected
-                  ? "border-[#1656d9] bg-[#eff5ff]"
-                  : "border-slate-200 bg-white",
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-lg font-black text-[#11284f]">{plan.label}</div>
-                  <div className="mt-1 text-sm font-black text-[#173e72]">{plan.title}</div>
-                  <div className="mt-2 text-[11px] leading-5 text-slate-500">
-                    {plan.perks}
-                  </div>
-                </div>
-                {plan.recommended ? (
-                  <div className="rounded-full bg-[#1656d9] px-3 py-1 text-[10px] font-black text-white">
-                    おすすめ
-                  </div>
-                ) : null}
+      <ScreenHeader title="応援プランを選択" subtitle={`${findFacility(animal.facilityId).name}の${animal.name}`} onBack={onBack} />
+      <div className="px-4 mt-6">
+        <SurfaceCard className="flex items-center gap-4 mb-8 p-5">
+          <div className="w-20 shrink-0"><ArtCanvas animal={animal} label={animal.name} compact /></div>
+          <div><div className="text-base font-black text-[#11284f]">{animal.name}を応援</div><div className="text-[11px] text-slate-500 mt-1">あなたの支援が暮らしを支えます</div></div>
+        </SurfaceCard>
+        <div className="grid gap-4">
+          {supportPlans.map(plan => (
+            <button key={plan.id} onClick={() => onSelectPlan(plan.id)} className={classNames("rounded-[28px] border p-6 text-left transition relative overflow-hidden", plan.id === selectedPlanId ? "border-[#1656d9] bg-[#eff5ff] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
+              <div className="flex justify-between items-start relative z-10">
+                <div><div className="text-xl font-black text-[#11284f]">{plan.label}</div><div className="text-base font-black text-[#173e72] mt-1">{plan.title}</div><div className="text-[12px] text-slate-500 mt-3 leading-relaxed">{plan.perks}</div></div>
+                {plan.recommended && <div className="rounded-full bg-[#1656d9] px-3 py-1 text-[10px] font-black text-white shadow-sm">おすすめ</div>}
               </div>
             </button>
-          );
-        })}
-      </div>
-
-      <SurfaceCard className="mt-4">
-        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-          お支払い方法
-        </div>
-        <div className="mt-3 flex items-center justify-between text-sm font-black text-[#11284f]">
-          <span>クレジットカード</span>
-          <ChevronRight className="h-4 w-4 text-slate-400" />
-        </div>
-      </SurfaceCard>
-
-      <PrimaryButton className="mt-6 w-full" onClick={onConfirm}>
-        次へ進む
-      </PrimaryButton>
-    </ScreenBase>
-  );
-}
-
-function SupportSuccessScreen({ animal, selectedPlan, onViewAnimal, onViewReports }) {
-  return (
-    <ScreenBase className="bg-white">
-      <StatusBar light />
-      <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#e8f8f0] text-emerald-600">
-          <CheckCircle2 className="h-10 w-10" />
-        </div>
-        <div className="mt-6 text-[2rem] font-black tracking-[-0.05em] text-[#10233c]">
-          応援が完了しました！
-        </div>
-        <div className="mt-3 text-sm leading-7 text-slate-500">
-          毎月の支援が、{animal.name} の健やかな暮らしを支えます。
-        </div>
-
-        <SurfaceCard className="mt-6 w-full max-w-[300px] text-left">
-          <div className="flex items-center gap-3">
-            <div className="w-20 shrink-0">
-              <ArtCanvas animal={animal} label={animal.name} compact />
-            </div>
-            <div>
-              <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
-              <div className="mt-1 text-[11px] text-slate-500">{selectedPlan.label}</div>
-            </div>
-          </div>
-        </SurfaceCard>
-
-        <PrimaryButton className="mt-6 w-full max-w-[300px]" onClick={onViewAnimal}>
-          応援した生き物を見る
-        </PrimaryButton>
-        <SecondaryButton className="mt-3 w-full max-w-[300px]" onClick={onViewReports}>
-          活動レポートを見る
-        </SecondaryButton>
-      </div>
-    </ScreenBase>
-  );
-}
-
-function ReportsScreen({
-  filter,
-  filteredReports,
-  onFilterChange,
-  onOpenReport,
-  onTabSelect,
-}) {
-  const featuredReport = filteredReports[0];
-
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="reports" onSelect={onTabSelect} />}
-    >
-      <StatusBar light />
-      <ScreenHeader
-        title="活動レポート"
-        subtitle="写真、記録、近況をひとつの流れで追えます。"
-        right={
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600"
-          >
-            <Bell className="h-4 w-4" />
-          </button>
-        }
-      />
-
-      <FilterTabs
-        items={["すべて", "写真", "記録", "お知らせ"]}
-        active={filter}
-        onSelect={onFilterChange}
-      />
-
-      {featuredReport ? (
-        <button
-          type="button"
-          onClick={() => onOpenReport(featuredReport.id)}
-          className="mt-4 block w-full text-left"
-        >
-          <SurfaceCard>
-            <ArtCanvas
-              animal={findAnimal(featuredReport.animalId)}
-              label={featuredReport.date}
-              detail={featuredReport.title}
-            />
-            <div className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-              <span>{featuredReport.category}</span>
-              <span>・</span>
-              <span>{findAnimal(featuredReport.animalId).name}</span>
-            </div>
-            <div className="mt-2 text-sm leading-6 text-slate-600">
-              {featuredReport.excerpt}
-            </div>
-          </SurfaceCard>
-        </button>
-      ) : null}
-
-      <div className="mt-4 grid gap-3">
-        {filteredReports.slice(1).map((report) => {
-          const animal = findAnimal(report.animalId);
-          return (
-            <button
-              key={report.id}
-              type="button"
-              onClick={() => onOpenReport(report.id)}
-              className="block w-full text-left"
-            >
-              <SurfaceCard className="flex items-start gap-3">
-                <div className="w-24 shrink-0">
-                  <ArtCanvas animal={animal} label={animal.name} compact />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-                    {report.category}
-                  </div>
-                  <div className="mt-2 text-sm font-black text-[#11284f]">{report.title}</div>
-                  <div className="mt-2 text-[11px] leading-5 text-slate-500">
-                    {report.excerpt}
-                  </div>
-                  <div className="mt-2 text-[10px] text-slate-400">{report.date}</div>
-                </div>
-              </SurfaceCard>
-            </button>
-          );
-        })}
-      </div>
-
-      {!featuredReport ? (
-        <SurfaceCard className="mt-4 text-center">
-          <div className="text-sm font-black text-[#11284f]">
-            まだこの条件のレポートはありません
-          </div>
-          <div className="mt-2 text-[11px] leading-6 text-slate-500">
-            フィルターを切り替えると、別の記録やお知らせを確認できます。
-          </div>
-        </SurfaceCard>
-      ) : null}
-    </ScreenBase>
-  );
-}
-
-function ReportDetailScreen({ report, onBack, onOpenSupport }) {
-  const animal = findAnimal(report.animalId);
-
-  return (
-    <ScreenBase className="bg-[#f7fbff]">
-      <StatusBar light />
-      <ScreenHeader title="レポート詳細" subtitle={report.date} onBack={onBack} />
-
-      <div className="mt-4">
-        <ArtCanvas animal={animal} label={animal.name} detail={report.title} />
-      </div>
-
-      <SurfaceCard className="mt-4">
-        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-          {report.category}
-        </div>
-        <div className="mt-3 text-xl font-black tracking-[-0.03em] text-[#11284f]">
-          {report.title}
-        </div>
-        <div className="mt-3 text-sm leading-7 text-slate-600">{report.body}</div>
-      </SurfaceCard>
-
-      <div className="mt-4">
-        <div className="text-sm font-black text-[#11284f]">ギャラリー</div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          {[animal, animal, findAnimal("otter")].slice(0, 3).map((item, index) => (
-            <ArtCanvas
-              key={`${item.id}-${index}`}
-              animal={item}
-              label={index === 0 ? "朝の様子" : index === 1 ? "健康チェック" : "仲間たち"}
-              compact
-            />
           ))}
         </div>
-      </div>
-
-      <PrimaryButton className="mt-6 w-full" onClick={onOpenSupport}>
-        この子を応援する
-      </PrimaryButton>
-    </ScreenBase>
-  );
-}
-
-function MemberScreen({ animal, supported, selectedPlan, rankProgress, onTabSelect }) {
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="member" onSelect={onTabSelect} />}
-    >
-      <StatusBar light />
-      <ScreenHeader
-        title="会員証"
-        subtitle="応援プランや来園特典をまとめて確認できます。"
-      />
-
-      <div className="mt-4 rounded-[30px] bg-[linear-gradient(145deg,#08203b_0%,#143d70_52%,#081a30_100%)] p-5 text-white shadow-[0_30px_70px_rgba(6,24,46,0.18)]">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-xl font-black">Aqzoo</div>
-            <div className="mt-2 text-[11px] text-cyan-100">サポーター会員証</div>
-          </div>
-          <div className="rounded-full bg-white/10 px-3 py-2 text-[10px] font-black text-cyan-100">
-            {supported ? "有効" : "体験中"}
-          </div>
-        </div>
-        <div className="mt-6 flex items-end justify-between gap-3">
-          <div>
-            <div className="text-lg font-black">山田 太郎</div>
-            <div className="mt-1 text-[11px] text-slate-200">会員ID: AQZ0016745</div>
-            <div className="mt-1 text-[11px] text-slate-200">
-              {supported
-                ? `応援中: ${animal.name} / ${selectedPlan.label}`
-                : "応援を始めるとここにプラン情報が表示されます"}
-            </div>
-          </div>
-          <div className="rounded-[18px] bg-white p-3 text-[#08203b]">
-            <QrCode className="h-12 w-12" />
-          </div>
-        </div>
-      </div>
-
-      <SurfaceCard className="mt-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-              会員ランク
-            </div>
-            <div className="mt-2 text-xl font-black text-[#11284f]">
-              {supported ? "シルバー" : "スターター"}
-            </div>
-          </div>
-          <Crown className="h-7 w-7 text-amber-500" />
-        </div>
-        <div className="mt-4 h-3 rounded-full bg-slate-100">
-          <div
-            className="h-3 rounded-full bg-gradient-to-r from-[#67d7cf] to-[#1656d9]"
-            style={{ width: `${rankProgress}%` }}
-          />
-        </div>
-        <div className="mt-2 text-[11px] text-slate-500">
-          次のランクまで {supported ? "2,000pt" : "応援を始めると加算されます"}
-        </div>
-      </SurfaceCard>
-
-      <div className="mt-4 grid gap-3">
-        {[
-          "限定イベントに先行参加",
-          "活動レポートの先行公開",
-          "来園チェックインで特別バッジ",
-        ].map((item) => (
-          <SurfaceCard key={item} className="rounded-[20px] px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eff5ff] text-[#1656d9]">
-                <Star className="h-5 w-5" />
-              </div>
-              <div className="text-sm font-black text-[#11284f]">{item}</div>
-            </div>
-          </SurfaceCard>
-        ))}
-      </div>
-    </ScreenBase>
-  );
-}
-
-function MyPageScreen({
-  animal,
-  supported,
-  selectedPlan,
-  onOpenNotifications,
-  onOpenRankings,
-  onOpenEvents,
-  onOpenMember,
-  onTabSelect,
-}) {
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
-    >
-      <StatusBar light />
-      <ScreenHeader
-        title="マイページ"
-        subtitle="お気に入りや会員情報、各種お知らせを確認できます。"
-      />
-
-      <div className="mt-4 rounded-[28px] bg-[linear-gradient(145deg,#08203b_0%,#10375e_65%,#1656d9_100%)] p-5 text-white shadow-[0_30px_70px_rgba(6,24,46,0.16)]">
-        <div className="flex items-center gap-4">
-          <img
-            src={formatImageUrl(selectedAnimalId)}
-            alt={selectedAnimal.name}
-            className="h-16 w-16 rounded-[22px] object-cover"
-          />
-          <div>
-            <div className="text-lg font-black">山田 太郎さん</div>
-            <div className="mt-1 text-[11px] text-slate-200">
-              会員ID: AQZ000345
-            </div>
-            <div className="mt-2 inline-flex rounded-full bg-white/12 px-3 py-1 text-[10px] font-black text-cyan-100">
-              {supported ? "サポーター会員" : "無料メンバー"}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <SurfaceCard className="mt-4">
-        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-          応援中の生き物
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <div className="w-24 shrink-0">
-            <ArtCanvas animal={animal} label={animal.name} compact />
-          </div>
-          <div>
-            <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
-            <div className="mt-1 text-[11px] text-slate-500">
-              {supported ? selectedPlan.label : "まだ応援を開始していません"}
-            </div>
-          </div>
-        </div>
-      </SurfaceCard>
-
-      <div className="mt-4 grid gap-3">
-        <MenuRow icon={Bell} label="お知らせ" value="新着を確認する" onClick={onOpenNotifications} />
-        <MenuRow icon={Trophy} label="ランキング" value="みんなの応援を見る" onClick={onOpenRankings} />
-        <MenuRow icon={CalendarDays} label="体験イベント" value="参加できる企画を探す" onClick={onOpenEvents} />
-        <MenuRow icon={CreditCard} label="会員証を開く" value="特典やQRを確認する" onClick={onOpenMember} />
-      </div>
-    </ScreenBase>
-  );
-}
-
-function NotificationsScreen({
-  filter,
-  notificationsList,
-  onFilterChange,
-  onBack,
-  onTabSelect,
-}) {
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
-    >
-      <StatusBar light />
-      <ScreenHeader title="お知らせ" subtitle="運営からの最新情報" onBack={onBack} />
-
-      <FilterTabs
-        items={["すべて", "お知らせ", "イベント", "メンテナンス"]}
-        active={filter}
-        onSelect={onFilterChange}
-      />
-
-      <div className="mt-4 grid gap-3">
-        {notificationsList.map((notice) => {
-          const animal = findAnimal(notice.animalId);
-          return (
-            <SurfaceCard key={notice.id} className="flex items-start gap-3">
-              <div className="w-20 shrink-0">
-                <ArtCanvas animal={animal} label={animal.name} compact />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-                    {notice.kind}
-                  </div>
-                  {notice.unread ? (
-                    <span className="h-2 w-2 rounded-full bg-[#ff6d55]" />
-                  ) : null}
-                </div>
-                <div className="mt-2 text-sm font-black text-[#11284f]">{notice.title}</div>
-                <div className="mt-2 text-[11px] leading-5 text-slate-500">
-                  {notice.excerpt}
-                </div>
-                <div className="mt-2 text-[10px] text-slate-400">{notice.date}</div>
-              </div>
-            </SurfaceCard>
-          );
-        })}
-      </div>
-    </ScreenBase>
-  );
-}
-
-function RankingsScreen({ range, onRangeChange, onBack, onTabSelect }) {
-  const rows = rankingRows[range];
-
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
-    >
-      <StatusBar light />
-      <ScreenHeader
-        title="ランキング"
-        subtitle="みんなの応援を、動物ごとに見える化。"
-        onBack={onBack}
-      />
-
-      <FilterTabs
-        items={["今月", "先月", "累計"]}
-        active={range}
-        onSelect={onRangeChange}
-      />
-
-      <div className="mt-4 grid gap-3">
-        {rows.map((row) => {
-          const animal = findAnimal(row.animalId);
-          return (
-            <SurfaceCard key={`${range}-${row.rank}-${row.animalId}`} className="flex items-center gap-3">
-              <div className="w-5 text-center text-sm font-black text-slate-400">{row.rank}</div>
-              <div className="w-16 shrink-0">
-                <ArtCanvas animal={animal} label={animal.name} compact />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-black text-[#11284f]">{animal.name}</div>
-                <div className="mt-1 text-[11px] text-slate-500">動物別応援ランキング</div>
-              </div>
-              <div className="text-[11px] font-black text-[#173e72]">{row.value}</div>
-            </SurfaceCard>
-          );
-        })}
-      </div>
-
-      <SurfaceCard className="mt-4">
-        <div className="text-sm font-black text-[#11284f]">応援の声</div>
-        <div className="mt-3 grid gap-3">
-          {supporterVoices.map((voice) => (
-            <div key={voice.id} className="rounded-[18px] bg-slate-50 px-4 py-3">
-              <div className="text-sm font-black text-[#11284f]">{voice.name}</div>
-              <div className="mt-1 text-[11px] text-slate-500">{voice.meta}</div>
-            </div>
-          ))}
-        </div>
-      </SurfaceCard>
-    </ScreenBase>
-  );
-}
-
-function EventsScreen({ onOpenEvent, onBack, onTabSelect }) {
-  return (
-    <ScreenBase
-      className="bg-[#f7fbff]"
-      bottomNav={<BottomNav active="mypage" onSelect={onTabSelect} />}
-    >
-      <StatusBar light />
-      <ScreenHeader
-        title="体験・イベント"
-        subtitle="現地での体験を、推しとのつながりに変える。"
-        onBack={onBack}
-      />
-
-      <div className="mt-4 grid gap-3">
-        {events.map((event) => {
-          const animal = findAnimal(event.animalId);
-          return (
-            <button
-              key={event.id}
-              type="button"
-              onClick={() => onOpenEvent(event.id)}
-              className="block w-full text-left"
-            >
-              <SurfaceCard>
-                <ArtCanvas animal={animal} label={event.date} detail={event.title} />
-                <div className="mt-3 text-[11px] leading-6 text-slate-500">{event.summary}</div>
-              </SurfaceCard>
-            </button>
-          );
-        })}
-      </div>
-    </ScreenBase>
-  );
-}
-
-function EventDetailScreen({ event, onBack }) {
-  const animal = findAnimal(event.animalId);
-
-  return (
-    <ScreenBase className="bg-[#f7fbff]">
-      <StatusBar light />
-      <ScreenHeader title="イベント詳細" subtitle={event.title} onBack={onBack} />
-
-      <div className="mt-4">
-        <ArtCanvas animal={animal} label={event.date} detail={event.title} />
-      </div>
-
-      <SurfaceCard className="mt-4">
-        <div className="text-sm leading-7 text-slate-600">{event.summary}</div>
-        <div className="mt-4 grid gap-3">
-          <DetailRow label="日時" value={event.date} />
-          <DetailRow label="場所" value={event.place} />
-          <DetailRow label="参加費" value={event.fee} />
-          <DetailRow label="定員" value={event.capacity} />
-        </div>
-      </SurfaceCard>
-
-      <PrimaryButton className="mt-6 w-full">申し込む</PrimaryButton>
-    </ScreenBase>
-  );
-}
-
-function DesktopHero() {
-  return (
-    <div className="rounded-[36px] border border-white/12 bg-[linear-gradient(155deg,#081a32_0%,#0f2946_58%,#103e68_100%)] p-7 text-white shadow-[0_34px_90px_rgba(6,24,46,0.18)]">
-      <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-cyan-100">
-        Aqzoo App
-      </div>
-      <h1 className="mt-5 font-display text-5xl font-black leading-[1.02] tracking-[-0.05em]">
-        あなたの「推し」を、
-        <br />
-        毎月応援できる。
-      </h1>
-      <p className="mt-5 text-sm leading-8 text-slate-200">
-        ホーム、応援、活動レポート、会員証、通知、ランキング、イベントを、
-        参考画像の導線に沿ってそのまま触れるモバイル体験として再構成しました。
-      </p>
-
-      <div className="mt-6 grid gap-3">
-        {desktopFeatures.map((feature) => (
-          <div
-            key={feature.title}
-            className="rounded-[24px] border border-white/10 bg-white/10 p-4 backdrop-blur"
-          >
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-cyan-100">
-                <feature.icon className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="text-sm font-black">{feature.title}</div>
-                <div className="mt-2 text-[11px] leading-6 text-slate-200">
-                  {feature.text}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+        <button onClick={onConfirm} className="mt-10 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-2xl active:scale-95 transition">応援を確定する</button>
       </div>
     </div>
   );
 }
 
-function DesktopFlow() {
+function SupportSuccessScreen({ animal, onTabSelect }) {
   return (
-    <div className="rounded-[30px] border border-slate-200 bg-white/90 p-5 shadow-[0_22px_70px_rgba(17,40,79,0.08)] backdrop-blur">
-      <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-        ユーザー体験フロー
-      </div>
-      <div className="mt-4 grid gap-3">
-        {experienceFlow.map((step, index) => (
-          <div key={step} className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eff5ff] text-[11px] font-black text-[#1656d9]">
-              {index + 1}
-            </div>
-            <div className="pt-1 text-sm leading-6 text-slate-600">{step}</div>
-          </div>
-        ))}
-      </div>
+    <div className="h-full bg-white flex flex-col items-center justify-center px-10 text-center">
+      <div className="h-24 w-24 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-8 shadow-inner"><CheckCircle2 className="h-12 w-12" /></div>
+      <div className="text-3xl font-black text-[#10233c] mb-4 tracking-tight">応援が完了しました！</div>
+      <p className="text-sm text-slate-500 leading-relaxed mb-12">{findFacility(animal.facilityId).name}の{animal.name}のサポーターになりました。</p>
+      <button onClick={() => onTabSelect("home")} className="w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white mb-4 shadow-xl active:scale-95 transition">ホームに戻る</button>
+      <button onClick={() => onTabSelect("reports")} className="w-full rounded-[22px] border-2 border-slate-100 py-5 text-base font-black text-slate-500 active:bg-slate-50 transition">レポートを見る</button>
     </div>
   );
 }
 
-function ShortcutButton({ label, active = false, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={classNames(
-        "rounded-[18px] px-4 py-3 text-left text-sm font-black transition",
-        active
-          ? "bg-[#1656d9] text-white shadow-[0_18px_34px_rgba(22,86,217,0.24)]"
-          : "bg-[#eff5ff] text-[#1656d9]",
-      )}
-    >
-      {label}
-    </button>
-  );
-}
-
+// --- メインアプリケーション ---
 function App() {
-  const rootScreens = React.useMemo(
-    () => new Set(["home", "discover", "reports", "member", "mypage"]),
-    [],
-  );
-
   const [stack, setStack] = React.useState(["home"]);
-  const [selectedAnimalId, setSelectedAnimalId] = React.useState("penguin");
+  const [searchStep, setSearchStep] = React.useState("category");
+  const [searchCategory, setSearchCategory] = React.useState(null);
+  const [searchFacilityId, setSearchFacilityId] = React.useState(null);
+  const [selectedAnimalId, setSelectedAnimalId] = React.useState("penguin-1");
+  const [followedIds, setFollowedIds] = React.useState(["penguin-1", "otter-1"]);
+  const [supportedIds, setSupportedIds] = React.useState(["penguin-1"]); // 初期状態で1匹応援中
   const [selectedPlanId, setSelectedPlanId] = React.useState("starter");
-  const [supportCompleted, setSupportCompleted] = React.useState(false);
-  const [followed, setFollowed] = React.useState(true);
-  const [reportFilter, setReportFilter] = React.useState("すべて");
-  const [noticeFilter, setNoticeFilter] = React.useState("すべて");
-  const [selectedReportId, setSelectedReportId] = React.useState(reports[0].id);
-  const [selectedEventId, setSelectedEventId] = React.useState(events[0].id);
-  const [rankingRange, setRankingRange] = React.useState("今月");
-  const [notificationCount, setNotificationCount] = React.useState(3);
 
-  const selectedAnimal = findAnimal(selectedAnimalId);
-  const selectedPlan =
-    supportPlans.find((plan) => plan.id === selectedPlanId) ?? supportPlans[0];
-  const selectedReport =
-    reports.find((report) => report.id === selectedReportId) ?? reports[0];
-  const selectedEvent =
-    events.find((event) => event.id === selectedEventId) ?? events[0];
-  const deferredReportFilter = React.useDeferredValue(reportFilter);
-  const deferredNoticeFilter = React.useDeferredValue(noticeFilter);
-  const currentScreen = stack[stack.length - 1];
-  const activeRoot =
-    [...stack].reverse().find((screen) => rootScreens.has(screen)) ?? "home";
-  const rankProgress = supportCompleted ? 72 : 38;
+  const push = (s) => setStack(c => [...c, s]);
+  const pop = () => setStack(c => c.slice(0, -1));
+  const reset = (s) => { setStack([s]); setSearchStep("category"); setSearchCategory(null); setSearchFacilityId(null); }
 
-  const filteredReports = React.useMemo(() => {
-    return reports.filter((report) => {
-      if (deferredReportFilter !== "すべて" && report.category !== deferredReportFilter) {
-        return false;
-      }
-      if (activeRoot === "discover" || currentScreen === "support") {
-        return report.animalId === selectedAnimalId;
-      }
-      return true;
-    });
-  }, [currentScreen, activeRoot, deferredReportFilter, selectedAnimalId]);
-
-  const filteredNotifications = React.useMemo(() => {
-    return notifications.filter((notice) => {
-      if (deferredNoticeFilter === "すべて") {
-        return true;
-      }
-      return notice.kind === deferredNoticeFilter;
-    });
-  }, [deferredNoticeFilter]);
-
-  const resetTo = (screen) => {
-    React.startTransition(() => {
-      setStack([screen]);
-    });
-  };
-
-  const push = (screen) => {
-    React.startTransition(() => {
-      setStack((current) => [...current, screen]);
-    });
-  };
-
-  const goBack = () => {
-    React.startTransition(() => {
-      setStack((current) => (current.length > 1 ? current.slice(0, -1) : current));
-    });
-  };
-
-  const openAnimal = (animalId) => {
-    setSelectedAnimalId(animalId);
-    resetTo("discover");
-  };
-
-  const openSupport = () => {
-    push("support");
-  };
-
-  const completeSupport = () => {
-    setSupportCompleted(true);
-    setNotificationCount((current) => current + 1);
-    push("support-success");
-  };
-
-  const openReport = (reportId) => {
-    setSelectedReportId(reportId);
-    push("report-detail");
-  };
-
-  const openEvent = (eventId) => {
-    setSelectedEventId(eventId);
-    push("event-detail");
-  };
+  const current = stack[stack.length - 1];
+  const animal = findAnimal(selectedAnimalId);
+  const followedAnimals = followedIds.map(findAnimal).filter(Boolean);
+  const supportedAnimals = supportedIds.map(findAnimal).filter(Boolean);
 
   let screen = null;
+  if (current === "home") screen = <HomeScreen selectedAnimal={animal} onSelectAnimal={(id) => { setSelectedAnimalId(id); push("detail"); }} onTabSelect={reset} />;
+  else if (current === "discover") screen = <DiscoverScreen step={searchStep} category={searchCategory} facilityId={searchFacilityId} onSelectCategory={(c) => { setSearchCategory(c); setSearchStep("facility"); }} onSelectFacility={(id) => { setSearchFacilityId(id); setSearchStep("animal"); }} onSelectAnimal={(id) => { setSelectedAnimalId(id); push("detail"); }} onTabSelect={reset} onBack={() => { if (searchStep === "animal") setSearchStep("facility"); else if (searchStep === "facility") setSearchStep("category"); else reset("home"); }} />;
+  else if (current === "reports") screen = <ReportsScreen onTabSelect={reset} />;
+  else if (current === "member") screen = <MemberScreen supportedAnimalId={supportedIds[0]} onTabSelect={reset} />;
+  else if (current === "mypage") screen = <MyPageScreen followedAnimals={followedAnimals} supportedAnimals={supportedAnimals} onSelectAnimal={(id) => { setSelectedAnimalId(id); push("detail"); }} onTabSelect={reset} />;
+  else if (current === "detail") screen = <DetailScreen animal={animal} followed={followedIds.includes(selectedAnimalId)} onToggleFollow={() => setFollowedIds(prev => prev.includes(selectedAnimalId) ? prev.filter(i => i !== selectedAnimalId) : [...prev, selectedAnimalId])} onOpenSupport={() => push("support")} onBack={pop} />;
+  else if (current === "support") screen = <SupportScreen animal={animal} selectedPlanId={selectedPlanId} onSelectPlan={setSelectedPlanId} onBack={pop} onConfirm={() => { setSupportedIds(prev => [...new Set([...prev, selectedAnimalId])]); push("support-success"); }} />;
+  else if (current === "support-success") screen = <SupportSuccessScreen animal={animal} onTabSelect={reset} />;
 
-  if (currentScreen === "home") {
-    screen = (
-      <HomeScreen
-        selectedAnimal={selectedAnimal}
-        notificationCount={notificationCount}
-        supported={supportCompleted}
-        onSelectAnimal={openAnimal}
-        onOpenSupport={openSupport}
-        onOpenReports={() => resetTo("reports")}
-        onOpenRankings={() => push("rankings")}
-        onOpenEvents={() => push("events")}
-        onOpenNotifications={() => push("notifications")}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "discover") {
-    screen = (
-      <DiscoverScreen
-        animal={selectedAnimal}
-        supported={supportCompleted}
-        followed={followed}
-        onToggleFollow={() => setFollowed((current) => !current)}
-        onOpenSupport={openSupport}
-        onOpenReports={() => resetTo("reports")}
-        onSelectAnimal={openAnimal}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "support") {
-    screen = (
-      <SupportScreen
-        animal={selectedAnimal}
-        selectedPlanId={selectedPlanId}
-        onSelectPlan={setSelectedPlanId}
-        onBack={goBack}
-        onConfirm={completeSupport}
-      />
-    );
-  } else if (currentScreen === "support-success") {
-    screen = (
-      <SupportSuccessScreen
-        animal={selectedAnimal}
-        selectedPlan={selectedPlan}
-        onViewAnimal={() => resetTo("discover")}
-        onViewReports={() => resetTo("reports")}
-      />
-    );
-  } else if (currentScreen === "reports") {
-    screen = (
-      <ReportsScreen
-        filter={reportFilter}
-        filteredReports={filteredReports}
-        onFilterChange={setReportFilter}
-        onOpenReport={openReport}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "report-detail") {
-    screen = (
-      <ReportDetailScreen
-        report={selectedReport}
-        onBack={goBack}
-        onOpenSupport={() => {
-          setSelectedAnimalId(selectedReport.animalId);
-          setStack(["discover", "support"]);
-        }}
-      />
-    );
-  } else if (currentScreen === "member") {
-    screen = (
-      <MemberScreen
-        animal={selectedAnimal}
-        supported={supportCompleted}
-        selectedPlan={selectedPlan}
-        rankProgress={rankProgress}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "mypage") {
-    screen = (
-      <MyPageScreen
-        animal={selectedAnimal}
-        supported={supportCompleted}
-        selectedPlan={selectedPlan}
-        onOpenNotifications={() => push("notifications")}
-        onOpenRankings={() => push("rankings")}
-        onOpenEvents={() => push("events")}
-        onOpenMember={() => resetTo("member")}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "notifications") {
-    screen = (
-      <NotificationsScreen
-        filter={noticeFilter}
-        notificationsList={filteredNotifications}
-        onFilterChange={setNoticeFilter}
-        onBack={goBack}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "rankings") {
-    screen = (
-      <RankingsScreen
-        range={rankingRange}
-        onRangeChange={setRankingRange}
-        onBack={goBack}
-        onTabSelect={resetTo}
-      />
-    );
-  } else if (currentScreen === "events") {
-    screen = (
-      <EventsScreen onOpenEvent={openEvent} onBack={goBack} onTabSelect={resetTo} />
-    );
-  } else {
-    screen = <EventDetailScreen event={selectedEvent} onBack={goBack} />;
-  }
-
-  return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(126,241,255,0.14),transparent_24%),linear-gradient(180deg,#f7fbff_0%,#eef4fb_100%)]">
-      <div className="mx-auto max-w-[1480px] px-4 py-5 md:px-6 xl:px-8">
-        <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)_300px]">
-          <div className="hidden xl:grid content-start gap-6">
-            <DesktopHero />
-            <DesktopFlow />
-          </div>
-
-          <div className="flex flex-col items-center gap-4">
-            <div className="hidden lg:block xl:hidden w-full rounded-[30px] border border-white/60 bg-white/75 p-5 shadow-[0_20px_60px_rgba(17,40,79,0.08)] backdrop-blur">
-              <div className="inline-flex rounded-full bg-[#eff5ff] px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-[#1656d9]">
-                Aqzoo App
-              </div>
-              <div className="mt-3 text-3xl font-black tracking-[-0.05em] text-[#10233c]">
-                あなたの「推し」を、毎月応援できる。
-            </div>
-            <div className="mt-3 text-sm leading-7 text-slate-600">
-              参考画像の流れに沿って、ホームから応援、レポート、会員証まで操作できます。
-            </div>
-            </div>
-
-            <PhoneFrame>{screen}</PhoneFrame>
-          </div>
-
-          <div className="hidden xl:grid content-start gap-4">
-            <div className="rounded-[30px] border border-slate-200 bg-white/90 p-5 shadow-[0_22px_70px_rgba(17,40,79,0.08)] backdrop-blur">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-                ライブ状態
-              </div>
-              <div className="mt-4 grid gap-3">
-                <div className="rounded-[20px] bg-slate-50 px-4 py-3">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
-                    現在の画面
-                  </div>
-                  <div className="mt-2 text-sm font-black text-[#11284f]">
-                    {tabItems.find((item) => item.key === activeRoot)?.label ?? currentScreen}
-                  </div>
-                </div>
-                <div className="rounded-[20px] bg-slate-50 px-4 py-3">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
-                    選択中の生き物
-                  </div>
-                  <div className="mt-2 text-sm font-black text-[#11284f]">
-                    {selectedAnimal.name}
-                  </div>
-                </div>
-                <div className="rounded-[20px] bg-slate-50 px-4 py-3">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
-                    応援状態
-                  </div>
-                  <div className="mt-2 text-sm font-black text-[#11284f]">
-                    {supportCompleted ? `${selectedPlan.label} で応援中` : "未開始"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[30px] border border-slate-200 bg-white/90 p-5 shadow-[0_22px_70px_rgba(17,40,79,0.08)] backdrop-blur">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#5a78b5]">
-                クイックジャンプ
-              </div>
-              <div className="mt-4 grid gap-3">
-                <ShortcutButton
-                  label="ホーム"
-                  active={currentScreen === "home"}
-                  onClick={() => resetTo("home")}
-                />
-                <ShortcutButton
-                  label="生き物詳細"
-                  active={currentScreen === "discover"}
-                  onClick={() => resetTo("discover")}
-                />
-                <ShortcutButton
-                  label="応援プラン"
-                  active={currentScreen === "support"}
-                  onClick={() => setStack(["discover", "support"])}
-                />
-                <ShortcutButton
-                  label="活動レポート"
-                  active={currentScreen === "reports" || currentScreen === "report-detail"}
-                  onClick={() => resetTo("reports")}
-                />
-                <ShortcutButton
-                  label="会員証"
-                  active={currentScreen === "member"}
-                  onClick={() => resetTo("member")}
-                />
-                <ShortcutButton
-                  label="お知らせ"
-                  active={currentScreen === "notifications"}
-                  onClick={() => setStack(["mypage", "notifications"])}
-                />
-                <ShortcutButton
-                  label="ランキング"
-                  active={currentScreen === "rankings"}
-                  onClick={() => setStack(["mypage", "rankings"])}
-                />
-                <ShortcutButton
-                  label="イベント"
-                  active={currentScreen === "events" || currentScreen === "event-detail"}
-                  onClick={() => setStack(["mypage", "events"])}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="min-h-screen flex items-center justify-center py-10"><PhoneFrame>{screen}</PhoneFrame></div>;
 }
 
 createRoot(document.getElementById("root")).render(<App />);
-
     </script>
   </body>
 </html>
