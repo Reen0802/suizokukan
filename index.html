@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ja">
   <head>
@@ -13,8 +14,12 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"M PLUS 1p"', '"Noto Sans JP"', "sans-serif"],
-              display: ['"Shippori Mincho"', '"Noto Serif JP"', "serif"],
+              sans: [\'"M PLUS 1p"\', \'"Noto Sans JP"\', "sans-serif"],
+              display: [\'"Shippori Mincho"\', \'"Noto Serif JP"\', "serif"],
+            },
+            boxShadow: {
+              aqua: "0 24px 70px rgba(15, 23, 42, 0.14)",
+              glass: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
             },
           },
         },
@@ -33,6 +38,7 @@
       }
     </script>
     <style>
+      html { scroll-behavior: smooth; }
       :root { --ink: #10233c; --bg-top: #07192f; --bg-bottom: #f4fbff; }
       body {
         margin: 0; min-height: 100vh;
@@ -40,9 +46,19 @@
         font-family: "M PLUS 1p", "Noto Sans JP", sans-serif;
         color: var(--ink); -webkit-font-smoothing: antialiased;
       }
-      @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
       .hide-scrollbar::-webkit-scrollbar { display: none; }
       .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* 画像に奥行きを出すためのスタイル */
+      .image-container {
+        perspective: 1000px;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
     </style>
   </head>
   <body>
@@ -51,6 +67,7 @@
     <script type="text/babel" data-type="module" data-presets="react">
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ArrowLeft, BadgeCheck, Bell, ChevronRight, Heart, Home, Search, Ticket, User, MapPin, Waves, Trees, Building2, QrCode, CheckCircle2, Crown, Star, Camera, Activity as ActivityIcon, Trophy, CalendarDays, CreditCard } from "lucide-react";
 
 // --- データ定義 ---
@@ -137,22 +154,81 @@ function BottomNav({ active, onSelect }) {
   );
 }
 
+// 強化されたArtCanvasコンポーネント
 function ArtCanvas({ animal, label, compact = false }) {
   return (
-    <div className={classNames("relative overflow-hidden rounded-[24px] bg-gradient-to-br", animal.tones, compact ? "h-24" : "h-48")}>
-      <img src={formatImageUrl(animal.type)} className={classNames("absolute object-cover animate-[floatY_8s_ease-in-out_infinite]", compact ? "bottom-2 right-2 h-16 w-16" : "bottom-4 right-4 h-32 w-32")} />
-      <div className="absolute inset-x-3 bottom-3"><div className="inline-flex rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur">{label}</div></div>
-    </div>
+    <motion.div 
+      className={classNames("relative overflow-hidden rounded-[24px] bg-gradient-to-br shadow-inner", animal.tones, compact ? "h-24" : "h-48")}
+      whileHover="hover"
+    >
+      {/* 背景の装飾 */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)]" />
+      </div>
+      
+      <motion.img
+        src={formatImageUrl(animal.type)}
+        className={classNames("absolute object-cover shadow-2xl border-2 border-white/30 rounded-2xl", compact ? "bottom-2 right-2 h-16 w-16" : "bottom-4 right-4 h-32 w-32")}
+        initial={{ y: 0, rotate: 0 }}
+        animate={{ 
+          y: [-8, 8, -8],
+          rotate: [-2, 2, -2]
+        }}
+        variants={{
+          hover: { 
+            scale: 1.1, 
+            rotate: 0,
+            transition: { duration: 0.3 }
+          }
+        }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      
+      {/* ラベルの装飾 */}
+      <div className="absolute inset-x-3 bottom-3">
+        <motion.div 
+          className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[9px] font-black text-white backdrop-blur-md border border-white/20 shadow-sm"
+          variants={{
+            hover: { x: 5 }
+          }}
+        >
+          {label}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
 function ScreenHeader({ title, subtitle, onBack, light = true }) {
   return (
     <div className="mt-4 flex items-start gap-3 px-4 mb-6">
-      {onBack && <button onClick={onBack} className={classNames("mt-1 h-8 w-8 rounded-full border flex items-center justify-center transition", light ? "border-slate-200 bg-white text-slate-700 active:bg-slate-50" : "border-white/10 bg-white/10 text-white active:bg-white/20")}><ArrowLeft className="h-4 w-4" /></button>}
+      {onBack && (
+        <motion.button 
+          onClick={onBack} 
+          className={classNames("mt-1 h-8 w-8 rounded-full border flex items-center justify-center transition", light ? "border-slate-200 bg-white text-slate-700 active:bg-slate-50" : "border-white/10 bg-white/10 text-white active:bg-white/20")}
+          whileTap={{ scale: 0.9 }}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </motion.button>
+      )}
       <div className="min-w-0">
-        <div className={classNames("text-xl font-black truncate", light ? "text-[#10233c]" : "text-white")}>{title}</div>
-        {subtitle && <div className={classNames("text-[11px] font-bold mt-0.5", light ? "text-slate-500" : "text-slate-300")}>{subtitle}</div>}
+        <motion.div 
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          className={classNames("text-xl font-black truncate", light ? "text-[#10233c]" : "text-white")}
+        >
+          {title}
+        </motion.div>
+        {subtitle && (
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className={classNames("text-[11px] font-bold mt-0.5", light ? "text-slate-500" : "text-slate-300")}
+          >
+            {subtitle}
+          </motion.div>
+        )}
       </div>
     </div>
   );
@@ -160,9 +236,14 @@ function ScreenHeader({ title, subtitle, onBack, light = true }) {
 
 function SurfaceCard({ children, className = "", dark = false }) {
   return (
-    <div className={classNames("rounded-[24px] border p-4 shadow-sm", dark ? "bg-white/10 border-white/10 text-white backdrop-blur" : "bg-white border-slate-200 text-[#11284f]", className)}>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
+      className={classNames("rounded-[24px] border p-4 shadow-glass transition-all duration-300", dark ? "bg-white/10 border-white/10 text-white backdrop-blur" : "bg-white/80 border-white/40 text-[#11284f] backdrop-blur-md", className)}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -170,32 +251,63 @@ function SurfaceCard({ children, className = "", dark = false }) {
 
 function HomeScreen({ selectedAnimal, onSelectAnimal, onTabSelect }) {
   return (
-    <div className="h-full bg-[linear-gradient(180deg,#08203b_0%,#10375e_100%)] text-white overflow-y-auto pb-24 hide-scrollbar">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="h-full bg-[linear-gradient(180deg,#08203b_0%,#10375e_100%)] text-white overflow-y-auto pb-24 hide-scrollbar"
+    >
       <StatusBar />
       <div className="px-4 mt-6">
         <div className="flex items-center justify-between">
           <div className="text-xl font-black tracking-tight">Aqzoo</div>
           <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center border border-white/10"><Bell className="h-4 w-4" /></div>
         </div>
-        <div className="mt-8 p-6 rounded-[32px] bg-white/10 border border-white/10 backdrop-blur shadow-xl">
+        
+        <motion.div 
+          className="mt-8 p-6 rounded-[32px] bg-white/10 border border-white/10 backdrop-blur-xl shadow-aqua"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100 }}
+        >
           <div className="text-3xl font-black leading-tight">あなたの「推し」を、<br/>毎月応援できる。</div>
-          <button onClick={() => onTabSelect("discover")} className="mt-6 w-full bg-white text-[#08203b] py-3.5 rounded-[18px] font-black text-sm shadow-lg active:scale-95 transition">生きものを探す</button>
+          <motion.button 
+            onClick={() => onTabSelect("discover")} 
+            className="mt-6 w-full bg-white text-[#08203b] py-3.5 rounded-[18px] font-black text-sm shadow-lg transition"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            生きものを探す
+          </motion.button>
+        </motion.div>
+        
+        <div className="mt-8">
+          <ArtCanvas animal={selectedAnimal} label={`${selectedAnimal.nickname} の近況`} />
         </div>
-        <div className="mt-8"><ArtCanvas animal={selectedAnimal} label={`${selectedAnimal.nickname} の近況`} /></div>
+        
         <div className="mt-8 grid grid-cols-2 gap-3">
-          {animals.slice(0, 4).map(a => (
-            <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="text-left rounded-[24px] bg-white/5 border border-white/5 p-2 backdrop-blur transition active:scale-95">
+          {animals.slice(0, 4).map((a, idx) => (
+            <motion.button 
+              key={a.id} 
+              onClick={() => onSelectAnimal(a.id)} 
+              className="text-left rounded-[24px] bg-white/5 border border-white/5 p-2 backdrop-blur transition shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+              whileTap={{ scale: 0.98 }}
+            >
               <ArtCanvas animal={a} label={a.name} compact />
               <div className="mt-2 px-1">
                 <div className="text-[11px] font-black truncate">{findFacility(a.facilityId)?.name}</div>
                 <div className="text-[9px] text-slate-400 mt-0.5">{formatYen(a.price)} / 月〜</div>
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
       <BottomNav active="home" onSelect={onTabSelect} />
-    </div>
+    </motion.div>
   );
 }
 
@@ -206,56 +318,125 @@ function DiscoverScreen({ step, category, facilityId, onSelectCategory, onSelect
   const bgClass = category === "aquarium" ? "bg-[linear-gradient(180deg,#004e92_0%,#000428_100%)]" : category === "zoo" ? "bg-[linear-gradient(180deg,#134e5e_0%,#71b280_100%)]" : "bg-[#f7fbff]";
 
   return (
-    <div className={classNames("h-full pb-24 overflow-y-auto hide-scrollbar transition-colors duration-500", bgClass)}>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={classNames("h-full pb-24 overflow-y-auto hide-scrollbar transition-colors duration-500", bgClass)}
+    >
       <StatusBar light={!category} />
-      <ScreenHeader title={step === "category" ? "さがす" : step === "facility" ? (category === "aquarium" ? "水族館を選ぶ" : "動物園を選ぶ") : findFacility(facilityId)?.name} subtitle={step === "category" ? "施設の種類から選ぶ" : step === "facility" ? "気になる施設を選んでください" : "この施設で暮らす仲間たち"} onBack={onBack} light={!category} />
+      <ScreenHeader 
+        title={step === "category" ? "さがす" : step === "facility" ? (category === "aquarium" ? "水族館を選ぶ" : "動物園を選ぶ") : findFacility(facilityId)?.name} 
+        subtitle={step === "category" ? "施設の種類から選ぶ" : step === "facility" ? "気になる施設を選んでください" : "この施設で暮らす仲間たち"} 
+        onBack={onBack} 
+        light={!category} 
+      />
       <div className="px-4">
-        {step === "category" && (
-          <div className="grid gap-4 mt-4">
-            <button onClick={() => onSelectCategory("aquarium")} className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-600 to-cyan-400 p-6 text-left text-white shadow-lg active:scale-95 transition"><Waves className="absolute -right-4 -top-4 h-32 w-32 opacity-20" /><div className="text-2xl font-black">水族館</div></button>
-            <button onClick={() => onSelectCategory("zoo")} className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-emerald-600 to-lime-400 p-6 text-left text-white shadow-lg active:scale-95 transition"><Trees className="absolute -right-4 -top-4 h-32 w-32 opacity-20" /><div className="text-2xl font-black">動物園</div></button>
-          </div>
-        )}
-        {step === "facility" && (
-          <div className="grid gap-3">
-            {filteredFacilities.map(f => (
-              <button key={f.id} onClick={() => onSelectFacility(f.id)} className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-5 text-left backdrop-blur-md text-white shadow-xl active:scale-95 transition">
-                <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center"><Building2 className="h-6 w-6" /></div>
-                <div className="flex-1 min-w-0"><div className="text-base font-black">{f.name}</div><div className="mt-1 flex items-center gap-1 text-[11px] opacity-70"><MapPin className="h-3 w-3" />{f.location}</div></div>
-                <ChevronRight className="h-5 w-5 opacity-40" />
-              </button>
-            ))}
-          </div>
-        )}
-        {step === "animal" && (
-          <div className="grid gap-4">
-            {filteredAnimals.map(a => (
-              <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-4 text-left backdrop-blur-md text-white shadow-xl active:scale-95 transition">
-                <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-black text-cyan-200 uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
-                  <div className="mt-1 text-lg font-black leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {step === "category" && (
+            <motion.div 
+              key="category"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="grid gap-4 mt-4"
+            >
+              <motion.button 
+                onClick={() => onSelectCategory("aquarium")} 
+                className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-600 to-cyan-400 p-6 text-left text-white shadow-lg transition"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Waves className="absolute -right-4 -top-4 h-32 w-32 opacity-20" />
+                <div className="text-2xl font-black">水族館</div>
+              </motion.button>
+              <motion.button 
+                onClick={() => onSelectCategory("zoo")} 
+                className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-emerald-600 to-lime-400 p-6 text-left text-white shadow-lg transition"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Trees className="absolute -right-4 -top-4 h-32 w-32 opacity-20" />
+                <div className="text-2xl font-black">動物園</div>
+              </motion.button>
+            </motion.div>
+          )}
+          
+          {step === "facility" && (
+            <motion.div 
+              key="facility"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="grid gap-3"
+            >
+              {filteredFacilities.map((f, idx) => (
+                <motion.button 
+                  key={f.id} 
+                  onClick={() => onSelectFacility(f.id)} 
+                  className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-5 text-left backdrop-blur-md text-white shadow-xl transition"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  whileHover={{ x: 5, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center"><Building2 className="h-6 w-6" /></div>
+                  <div className="flex-1 min-w-0"><div className="text-base font-black">{f.name}</div><div className="mt-1 flex items-center gap-1 text-[11px] opacity-70"><MapPin className="h-3 w-3" />{f.location}</div></div>
+                  <ChevronRight className="h-5 w-5 opacity-40" />
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+          
+          {step === "animal" && (
+            <motion.div 
+              key="animal"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="grid gap-4"
+            >
+              {filteredAnimals.map((a, idx) => (
+                <motion.button 
+                  key={a.id} 
+                  onClick={() => onSelectAnimal(a.id)} 
+                  className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-4 text-left backdrop-blur-md text-white shadow-xl transition"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  whileHover={{ x: 5, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-black text-cyan-200 uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
+                    <div className="mt-1 text-lg font-black leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
+                  </div>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <BottomNav active="discover" onSelect={onTabSelect} />
-    </div>
+    </motion.div>
   );
 }
 
 function ReportsScreen({ onTabSelect }) {
   return (
-    <div className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar"
+    >
       <StatusBar light />
       <ScreenHeader title="活動レポート" subtitle="写真、記録、近況を追えます。" />
       <div className="px-4 grid gap-4">
-        {reports.map(r => {
+        {reports.map((r, idx) => {
           const a = findAnimal(r.animalId);
           return (
-            <SurfaceCard key={r.id} className="flex gap-4 p-5">
+            <SurfaceCard key={r.id} className="flex gap-4 p-5" transition={{ delay: idx * 0.1 }}>
               <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
               <div className="flex-1 min-w-0">
                 <div className="text-[9px] font-black text-[#5a78b5] uppercase tracking-widest">{r.category} • {r.date}</div>
@@ -267,7 +448,7 @@ function ReportsScreen({ onTabSelect }) {
         })}
       </div>
       <BottomNav active="reports" onSelect={onTabSelect} />
-    </div>
+    </motion.div>
   );
 }
 
@@ -275,46 +456,80 @@ function MemberScreen({ supportedAnimalId, onTabSelect }) {
   const animal = findAnimal(supportedAnimalId) || animals[0];
   const facility = findFacility(animal.facilityId);
   return (
-    <div className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar"
+    >
       <StatusBar light />
       <ScreenHeader title="会員証" subtitle="応援プランの確認と現地特典" />
       <div className="px-4">
-        <div className="rounded-[30px] bg-gradient-to-br from-[#08203b] via-[#143d70] to-[#081a30] p-7 text-white shadow-2xl relative overflow-hidden">
-          <div className="flex justify-between items-start">
+        <motion.div 
+          className="rounded-[30px] bg-gradient-to-br from-[#08203b] via-[#143d70] to-[#081a30] p-7 text-white shadow-2xl relative overflow-hidden"
+          whileHover={{ scale: 1.02 }}
+        >
+          {/* 背景の光の装飾 */}
+          <motion.div 
+            className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 5, repeat: Infinity }}
+          />
+          
+          <div className="flex justify-between items-start relative z-10">
             <div><div className="text-2xl font-black">Aqzoo</div><div className="text-[10px] opacity-60 mt-1 uppercase tracking-widest">Supporter Card</div></div>
             <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-[9px] font-black border border-emerald-500/30 text-emerald-400">ACTIVE</div>
           </div>
-          <div className="mt-12 flex justify-between items-end">
+          <div className="mt-12 flex justify-between items-end relative z-10">
             <div><div className="text-xl font-black">山田 太郎</div><div className="text-[11px] opacity-60 mt-1">ID: AQZ-998822</div><div className="text-[11px] text-cyan-200 mt-3 font-black">{facility.name}の{animal.name}を応援中</div></div>
-            <div className="bg-white p-3 rounded-2xl text-[#08203b] shadow-xl"><QrCode className="h-12 w-12" /></div>
+            <motion.div 
+              className="bg-white p-3 rounded-2xl text-[#08203b] shadow-xl"
+              whileHover={{ rotate: 5, scale: 1.1 }}
+            >
+              <QrCode className="h-12 w-12" />
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
       <BottomNav active="member" onSelect={onTabSelect} />
-    </div>
+    </motion.div>
   );
 }
 
 function MyPageScreen({ followedAnimals, supportedAnimals, onSelectAnimal, onTabSelect }) {
   return (
-    <div className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar"
+    >
       <StatusBar light />
       <ScreenHeader title="マイページ" subtitle="あなたのお気に入り・応援状況" />
       <div className="px-4">
-        <div className="rounded-[32px] bg-gradient-to-br from-[#08203b] to-[#1656d9] p-6 text-white shadow-xl flex items-center gap-5">
+        <motion.div 
+          className="rounded-[32px] bg-gradient-to-br from-[#08203b] to-[#1656d9] p-6 text-white shadow-xl flex items-center gap-5"
+          whileHover={{ y: -5 }}
+        >
           <div className="h-16 w-16 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner"><User className="h-9 w-9" /></div>
           <div><div className="text-xl font-black">山田 太郎さん</div><div className="text-[11px] opacity-70 mt-1">サポーター会員 ID: 000345</div></div>
-        </div>
+        </motion.div>
 
-        {/* 応援中の生きものセクション */}
         <div className="mt-10">
           <div className="flex items-center justify-between mb-5">
             <div className="text-xs font-black text-slate-400 uppercase tracking-widest">応援中の生きもの</div>
             <div className="text-[10px] font-black text-[#1656d9] bg-[#eaf1ff] px-2 py-0.5 rounded-full">{supportedAnimals.length}件</div>
           </div>
           <div className="grid gap-4">
-            {supportedAnimals.length > 0 ? supportedAnimals.map(a => (
-              <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="flex items-center gap-4 rounded-[28px] border-2 border-[#1656d9] bg-white p-4 text-left shadow-md transition active:scale-[0.98]">
+            {supportedAnimals.length > 0 ? supportedAnimals.map((a, idx) => (
+              <motion.button 
+                key={a.id} 
+                onClick={() => onSelectAnimal(a.id)} 
+                className="flex items-center gap-4 rounded-[28px] border-2 border-[#1656d9] bg-white p-4 text-left shadow-md transition"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ x: 5 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <div className="w-20 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-black text-[#1656d9] uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
@@ -322,58 +537,97 @@ function MyPageScreen({ followedAnimals, supportedAnimals, onSelectAnimal, onTab
                   <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-black text-[#1656d9] bg-[#eaf1ff] px-2 py-0.5 rounded-full">応援中</div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-[#1656d9]" />
-              </button>
+              </motion.button>
             )) : <div className="p-8 text-center text-slate-400 text-xs font-bold border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50/50">応援中の生きものはいません</div>}
           </div>
         </div>
 
-        {/* 推しにしている生きものセクション */}
         <div className="mt-10">
           <div className="flex items-center justify-between mb-5">
             <div className="text-xs font-black text-slate-400 uppercase tracking-widest">推しにしている生きもの</div>
             <div className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{followedAnimals.length}件</div>
           </div>
           <div className="grid gap-4">
-            {followedAnimals.length > 0 ? followedAnimals.map(a => (
-              <button key={a.id} onClick={() => onSelectAnimal(a.id)} className="flex items-center gap-4 rounded-[28px] border border-slate-200 bg-white p-4 text-left shadow-sm transition active:scale-[0.98]">
+            {followedAnimals.length > 0 ? followedAnimals.map((a, idx) => (
+              <motion.button 
+                key={a.id} 
+                onClick={() => onSelectAnimal(a.id)} 
+                className="flex items-center gap-4 rounded-[28px] border border-slate-200 bg-white p-4 text-left shadow-sm transition"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ x: 5 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <div className="w-20 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-black text-[#1656d9] uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
                   <div className="text-base font-black text-[#11284f] leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-slate-200" />
-              </button>
+              </motion.button>
             )) : <div className="p-8 text-center text-slate-400 text-xs font-bold border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50/50">推しの生きものはいません</div>}
           </div>
         </div>
       </div>
       <BottomNav active="mypage" onSelect={onTabSelect} />
-    </div>
+    </motion.div>
   );
 }
 
 function DetailScreen({ animal, followed, onToggleFollow, onOpenSupport, onBack }) {
   const facility = findFacility(animal.facilityId);
   return (
-    <div className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar">
+    <motion.div 
+      initial={{ opacity: 0, scale: 1.1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar"
+    >
       <StatusBar light />
       <ScreenHeader title="生き物詳細" subtitle={`${facility.name}の仲間`} onBack={onBack} />
       <div className="px-4 mt-4">
         <ArtCanvas animal={animal} label={facility.name} />
         <div className="mt-6 flex items-start justify-between">
-          <div><div className="text-2xl font-black text-[#10233c] leading-tight">{facility.name}の<br/>{animal.name}</div><div className="mt-2 text-sm font-bold text-slate-500">{animal.nickname}</div></div>
-          <button onClick={onToggleFollow} className={classNames("h-12 w-12 rounded-full border flex items-center justify-center transition active:scale-90", followed ? "border-[#ffd2ca] bg-[#fff0ec] text-[#ff7f68] shadow-sm" : "border-slate-200 bg-white text-slate-400")}><Heart className={classNames("h-6 w-6", followed ? "fill-current" : "")} /></button>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="text-2xl font-black text-[#10233c] leading-tight">{facility.name}の<br/>{animal.name}</div>
+            <div className="mt-2 text-sm font-bold text-slate-500">{animal.nickname}</div>
+          </motion.div>
+          <motion.button 
+            onClick={onToggleFollow} 
+            className={classNames("h-12 w-12 rounded-full border flex items-center justify-center transition shadow-sm", followed ? "border-[#ffd2ca] bg-[#fff0ec] text-[#ff7f68]" : "border-slate-200 bg-white text-slate-400")}
+            whileTap={{ scale: 0.8 }}
+          >
+            <Heart className={classNames("h-6 w-6", followed ? "fill-current" : "")} />
+          </motion.button>
         </div>
-        <SurfaceCard className="mt-8 p-6 shadow-md"><div className="text-[10px] font-black text-[#5a78b5] uppercase tracking-widest mb-3">概要</div><p className="text-sm leading-7 text-slate-600">{animal.summary}</p></SurfaceCard>
-        <button onClick={onOpenSupport} className="mt-8 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-xl active:scale-95 transition">この子を応援する</button>
+        <SurfaceCard className="mt-8 p-6 shadow-md" transition={{ delay: 0.3 }}>
+          <div className="text-[10px] font-black text-[#5a78b5] uppercase tracking-widest mb-3">概要</div>
+          <p className="text-sm leading-7 text-slate-600">{animal.summary}</p>
+        </SurfaceCard>
+        <motion.button 
+          onClick={onOpenSupport} 
+          className="mt-8 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-xl transition"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          この子を応援する
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 function SupportScreen({ animal, selectedPlanId, onSelectPlan, onBack, onConfirm }) {
   return (
-    <div className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar"
+    >
       <StatusBar light />
       <ScreenHeader title="応援プランを選択" subtitle={`${findFacility(animal.facilityId).name}の${animal.name}`} onBack={onBack} />
       <div className="px-4 mt-6">
@@ -382,30 +636,85 @@ function SupportScreen({ animal, selectedPlanId, onSelectPlan, onBack, onConfirm
           <div><div className="text-base font-black text-[#11284f]">{animal.name}を応援</div><div className="text-[11px] text-slate-500 mt-1">あなたの支援が暮らしを支えます</div></div>
         </SurfaceCard>
         <div className="grid gap-4">
-          {supportPlans.map(plan => (
-            <button key={plan.id} onClick={() => onSelectPlan(plan.id)} className={classNames("rounded-[28px] border p-6 text-left transition relative overflow-hidden", plan.id === selectedPlanId ? "border-[#1656d9] bg-[#eff5ff] shadow-md" : "border-slate-200 bg-white shadow-sm")}>
+          {supportPlans.map((plan, idx) => (
+            <motion.button 
+              key={plan.id} 
+              onClick={() => onSelectPlan(plan.id)} 
+              className={classNames("rounded-[28px] border p-6 text-left transition relative overflow-hidden", plan.id === selectedPlanId ? "border-[#1656d9] bg-[#eff5ff] shadow-md" : "border-slate-200 bg-white shadow-sm")}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
               <div className="flex justify-between items-start relative z-10">
                 <div><div className="text-xl font-black text-[#11284f]">{plan.label}</div><div className="text-base font-black text-[#173e72] mt-1">{plan.title}</div><div className="text-[12px] text-slate-500 mt-3 leading-relaxed">{plan.perks}</div></div>
                 {plan.recommended && <div className="rounded-full bg-[#1656d9] px-3 py-1 text-[10px] font-black text-white shadow-sm">おすすめ</div>}
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
-        <button onClick={onConfirm} className="mt-10 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-2xl active:scale-95 transition">応援を確定する</button>
+        <motion.button 
+          onClick={onConfirm} 
+          className="mt-10 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-2xl transition"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          応援を確定する
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 function SupportSuccessScreen({ animal, onTabSelect }) {
   return (
-    <div className="h-full bg-white flex flex-col items-center justify-center px-10 text-center">
-      <div className="h-24 w-24 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-8 shadow-inner"><CheckCircle2 className="h-12 w-12" /></div>
-      <div className="text-3xl font-black text-[#10233c] mb-4 tracking-tight">応援が完了しました！</div>
-      <p className="text-sm text-slate-500 leading-relaxed mb-12">{findFacility(animal.facilityId).name}の{animal.name}のサポーターになりました。</p>
-      <button onClick={() => onTabSelect("home")} className="w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white mb-4 shadow-xl active:scale-95 transition">ホームに戻る</button>
-      <button onClick={() => onTabSelect("reports")} className="w-full rounded-[22px] border-2 border-slate-100 py-5 text-base font-black text-slate-500 active:bg-slate-50 transition">レポートを見る</button>
-    </div>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="h-full bg-white flex flex-col items-center justify-center px-10 text-center"
+    >
+      <motion.div 
+        className="h-24 w-24 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-8 shadow-inner"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", damping: 10 }}
+      >
+        <CheckCircle2 className="h-12 w-12" />
+      </motion.div>
+      <motion.div 
+        className="text-3xl font-black text-[#10233c] mb-4 tracking-tight"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        応援が完了しました！
+      </motion.div>
+      <motion.p 
+        className="text-sm text-slate-500 leading-relaxed mb-12"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        {findFacility(animal.facilityId).name}の{animal.name}のサポーターになりました。
+      </motion.p>
+      <motion.button 
+        onClick={() => onTabSelect("home")} 
+        className="w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white mb-4 shadow-xl transition"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        ホームに戻る
+      </motion.button>
+      <motion.button 
+        onClick={() => onTabSelect("reports")} 
+        className="w-full rounded-[22px] border-2 border-slate-100 py-5 text-base font-black text-slate-500 transition"
+        whileHover={{ scale: 1.02, backgroundColor: "rgba(0,0,0,0.02)" }}
+        whileTap={{ scale: 0.98 }}
+      >
+        レポートを見る
+      </motion.button>
+    </motion.div>
   );
 }
 
@@ -417,7 +726,7 @@ function App() {
   const [searchFacilityId, setSearchFacilityId] = React.useState(null);
   const [selectedAnimalId, setSelectedAnimalId] = React.useState("penguin-1");
   const [followedIds, setFollowedIds] = React.useState(["penguin-1", "otter-1"]);
-  const [supportedIds, setSupportedIds] = React.useState(["penguin-1"]); // 初期状態で1匹応援中
+  const [supportedIds, setSupportedIds] = React.useState(["penguin-1"]);
   const [selectedPlanId, setSelectedPlanId] = React.useState("starter");
 
   const push = (s) => setStack(c => [...c, s]);
@@ -439,7 +748,15 @@ function App() {
   else if (current === "support") screen = <SupportScreen animal={animal} selectedPlanId={selectedPlanId} onSelectPlan={setSelectedPlanId} onBack={pop} onConfirm={() => { setSupportedIds(prev => [...new Set([...prev, selectedAnimalId])]); push("support-success"); }} />;
   else if (current === "support-success") screen = <SupportSuccessScreen animal={animal} onTabSelect={reset} />;
 
-  return <div className="min-h-screen flex items-center justify-center py-10"><PhoneFrame>{screen}</PhoneFrame></div>;
+  return (
+    <div className="min-h-screen flex items-center justify-center py-10">
+      <PhoneFrame>
+        <AnimatePresence mode="wait">
+          {screen}
+        </AnimatePresence>
+      </PhoneFrame>
+    </div>
+  );
 }
 
 createRoot(document.getElementById("root")).render(<App />);
