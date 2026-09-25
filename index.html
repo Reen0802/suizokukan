@@ -1,764 +1,205 @@
 <!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aqzoo | 推しを毎月応援できるアプリ</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: [\'"M PLUS 1p"\', \'"Noto Sans JP"\', "sans-serif"],
-              display: [\'"Shippori Mincho"\', \'"Noto Serif JP"\', "serif"],
-            },
-            boxShadow: {
-              aqua: "0 24px 70px rgba(15, 23, 42, 0.14)",
-              glass: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
-            },
-          },
-        },
-      };
-    </script>
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://esm.sh/react@18.3.1?dev",
-          "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime?dev",
-          "react/jsx-dev-runtime": "https://esm.sh/react@18.3.1/jsx-dev-runtime?dev",
-          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?dev",
-          "framer-motion": "https://esm.sh/framer-motion@11.18.2?dev&external=react,react-dom",
-          "lucide-react": "https://esm.sh/lucide-react@0.511.0?dev&external=react"
-        }
-      }
-    </script>
-    <style>
-      html { scroll-behavior: smooth; }
-      :root { --ink: #10233c; --bg-top: #07192f; --bg-bottom: #f4fbff; }
-      body {
-        margin: 0; min-height: 100vh;
-        background: radial-gradient(circle at top, rgba(126, 241, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(244, 251, 255, 0.98)), var(--bg-bottom);
-        font-family: "M PLUS 1p", "Noto Sans JP", sans-serif;
-        color: var(--ink); -webkit-font-smoothing: antialiased;
-      }
-      .hide-scrollbar::-webkit-scrollbar { display: none; }
-      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      
-      /* 画像に奥行きを出すためのスタイル */
-      .image-container {
-        perspective: 1000px;
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script type="text/babel" data-type="module" data-presets="react">
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { motion, AnimatePresence } from "framer-motion";
-import { Activity, ArrowLeft, BadgeCheck, Bell, ChevronRight, Heart, Home, Search, Ticket, User, MapPin, Waves, Trees, Building2, QrCode, CheckCircle2, Crown, Star, Camera, Activity as ActivityIcon, Trophy, CalendarDays, CreditCard } from "lucide-react";
-
-// --- データ定義 ---
-const facilities = [
-  { id: "mirai-aqua", name: "ミライ水族館", category: "aquarium", location: "湾岸エリア" },
-  { id: "deep-blue", name: "ディープブルー・シー", category: "aquarium", location: "海岬市" },
-  { id: "savanna-forest", name: "サバンナの森動物園", category: "zoo", location: "丘陵エリア" },
-  { id: "sky-garden", name: "スカイガーデン・パーク", category: "zoo", location: "高原市" },
-];
-
-const animals = [
-  { id: "penguin-1", facilityId: "mirai-aqua", type: "penguin", name: "ペンギン", nickname: "ユキ", price: 500, tones: "from-slate-950 via-sky-800 to-cyan-400", summary: "ミライ水族館の人気者。光の演出に合わせて元気に泳ぎます。" },
-  { id: "otter-1", facilityId: "mirai-aqua", type: "otter", name: "カワウソ", nickname: "キラ", price: 800, tones: "from-amber-900 via-orange-800 to-yellow-600", summary: "器用に手を使って遊ぶ、好奇心旺盛なカワウソ。" },
-  { id: "dolphin-1", facilityId: "deep-blue", type: "dolphin", name: "イルカ", nickname: "ソラ", price: 1000, tones: "from-[#072847] via-[#1b5ea8] to-[#67c9ff]", summary: "深い青のプールで優雅に舞う、知能の高いイルカ。" },
-  { id: "penguin-2", facilityId: "deep-blue", type: "penguin", name: "ペンギン", nickname: "ハル", price: 500, tones: "from-slate-800 via-blue-900 to-indigo-500", summary: "深い海の底をイメージした展示で暮らすペンギン。" },
-  { id: "lion-1", facilityId: "savanna-forest", type: "lion", name: "ライオン", nickname: "レオ", price: 1000, tones: "from-[#2f1606] via-[#8c4b16] to-[#f4be63]", summary: "サバンナの王者にふさわしい、堂々とした風格。" },
-  { id: "otter-2", facilityId: "savanna-forest", type: "otter", name: "コツメカワウソ", nickname: "モチ", price: 800, tones: "from-[#0f2137] via-[#365d7d] to-[#8ed5de]", summary: "森の川辺で仲良く暮らす、家族思いのカワウソ。" },
-  { id: "lion-2", facilityId: "sky-garden", type: "lion", name: "ライオン", nickname: "シンバ", price: 1000, tones: "from-orange-950 via-red-900 to-amber-600", summary: "高原の風を感じながら、のんびりと過ごすライオン。" },
-  { id: "dolphin-2", facilityId: "sky-garden", type: "dolphin", name: "イルカ", nickname: "ルナ", price: 1000, tones: "from-blue-950 via-indigo-800 to-purple-500", summary: "空を飛ぶように泳ぐ、ダイナミックなジャンプが自慢。" },
-];
-
-const reports = [
-  { id: "r1", animalId: "penguin-1", category: "写真", date: "2026.06.28", title: "朝の体重チェック", excerpt: "今朝も元気に体重測定。安定した健康状態です。" },
-  { id: "r2", animalId: "lion-1", category: "記録", date: "2026.06.25", title: "新しい遊具を導入", excerpt: "ライオンたちが新しいおもちゃに興味津々です。" },
-  { id: "r3", animalId: "otter-1", category: "写真", date: "2026.06.20", title: "お昼寝の様子", excerpt: "仲間と身を寄せ合って眠る愛らしい姿。" },
-];
-
-const supportPlans = [
-  { id: "starter", amount: 500, label: "500円 / 月", title: "気軽に応援プラン", perks: "毎月のレポート / 写真 / 会員証", recommended: true },
-  { id: "grow", amount: 1000, label: "1,000円 / 月", title: "しっかり見守りプラン", perks: "月次まとめ / 限定先行レポート" },
-];
-
-// --- 共通コンポーネント ---
-function classNames(...values) { return values.filter(Boolean).join(" "); }
-function findAnimal(id) { return animals.find(a => a.id === id); }
-function findFacility(id) { return facilities.find(f => f.id === id); }
-function formatYen(v) { return `${v.toLocaleString("ja-JP")}円`; }
-function formatImageUrl(type) {
-  const urls = {
-    penguin: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/iMxoACEWDIwJDZap.jpg",
-    otter: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/nxNgSWdlEwjUoHyb.jpg",
-    dolphin: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/lQIBXQWAeqilFEVm.jpg",
-    lion: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663339388060/mRuBUjzsnVydBUZm.jpg",
-  };
-  return urls[type] || urls.penguin;
-}
-
-function PhoneFrame({ children }) {
-  return (
-    <div className="w-full max-w-[408px] rounded-[44px] border border-white/40 bg-white/65 p-2 shadow-2xl backdrop-blur">
-      <div className="relative aspect-[390/844] overflow-hidden rounded-[34px] border border-white/70 bg-white">{children}</div>
-    </div>
-  );
-}
-
-function StatusBar({ light = false }) {
-  return (
-    <div className={classNames("flex items-center justify-between px-6 pt-4 text-[11px] font-black", light ? "text-slate-900" : "text-white")}>
-      <span>9:41</span>
-      <div className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-current" /><span className="h-2 w-2 rounded-full bg-current" /></div>
-    </div>
-  );
-}
-
-function BottomNav({ active, onSelect }) {
-  const items = [
-    { key: "home", label: "ホーム", icon: Home },
-    { key: "discover", label: "さがす", icon: Search },
-    { key: "reports", label: "レポート", icon: ActivityIcon },
-    { key: "member", label: "会員証", icon: Ticket },
-    { key: "mypage", label: "マイページ", icon: User },
-  ];
-  return (
-    <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white/92 px-4 pb-5 pt-3 backdrop-blur z-50">
-      <div className="grid grid-cols-5 gap-2">
-        {items.map((item) => (
-          <button key={item.key} onClick={() => onSelect(item.key)} className={classNames("rounded-2xl px-2 py-2 text-center transition", item.key === active ? "bg-[#eaf1ff] text-[#1656d9]" : "text-slate-500")}>
-            <item.icon className="mx-auto h-4 w-4" />
-            <div className="mt-1 text-[10px] font-black">{item.label}</div>
-          </button>
-        ))}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AQZOO｜生き物の価値を、次の事業と体験へ。</title>
+  <meta name="description" content="Aqzooは、生き物の価値をクリエイティブ、テクノロジー、事業開発で社会へひらくスタートアップです。" />
+  <meta name="theme-color" content="#081110" />
+  <style>
+    :root{
+      --bg:#f2f8f3;
+      --paper:#ffffff;
+      --ink:#0d1614;
+      --muted:#61706b;
+      --line:rgba(13,22,20,.10);
+      --green:#D9FF57;
+      --aqua:#89EFE4;
+      --blue:#8AB9FF;
+      --purple:#D4B7FF;
+      --orange:#FFA282;
+      --yellow:#FFE47E;
+      --pink:#FF97CB;
+      --dark:#0A1211;
+      --shadow:0 24px 80px rgba(15,32,26,.10);
+      --radius-xl:40px;
+      --max:1240px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,-apple-system,sans-serif;color:var(--ink);line-height:1.7;letter-spacing:.01em;background:radial-gradient(circle at 10% 8%, rgba(137,239,228,.30), transparent 20%),radial-gradient(circle at 95% 10%, rgba(217,255,87,.26), transparent 24%),radial-gradient(circle at 80% 42%, rgba(212,183,255,.22), transparent 25%),linear-gradient(180deg,#fbfefb 0%, #f2f8f3 100%);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit} img,svg{display:block;max-width:100%}
+    .wrap{width:min(var(--max), calc(100% - 28px));margin:auto}
+    .section{padding:110px 0}
+    .tiny{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#3d7f71}
+    .tiny::before{content:"";width:28px;height:2px;background:currentColor;border-radius:999px}
+    h1,h2,h3,h4,p{margin:0}
+    h2{font-size:clamp(40px,5.6vw,80px);line-height:.97;letter-spacing:-.055em;font-weight:980}
+    .lead{margin-top:20px;font-size:17px;color:var(--muted);max-width:780px}
+    .btns{display:flex;flex-wrap:wrap;gap:12px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:850;transition:.25s ease;box-shadow:0 8px 20px rgba(10,20,15,.03)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(10,20,15,.10)}
+    .btn.dark{background:var(--dark);border-color:var(--dark);color:#fff}.btn.green{background:var(--green);border-color:var(--green)}
+    .chip{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:800}
+    .sticker{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:900;letter-spacing:.04em;box-shadow:0 12px 26px rgba(13,22,20,.08);transform:rotate(-4deg);background:#fff}
+    .sticker.green{background:var(--green)} .sticker.aqua{background:var(--aqua)} .sticker.pink{background:var(--pink)} .sticker.white{background:#fff;border:1px solid var(--line)}
+    header{position:sticky;top:0;z-index:90;backdrop-filter:blur(16px);background:rgba(251,254,251,.76);border-bottom:1px solid rgba(13,22,20,.08)}
+    .nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:980;letter-spacing:.12em}
+    .logo-mark{width:34px;height:34px;border-radius:11px;background:var(--dark);color:#fff;display:grid;place-items:center;box-shadow:0 12px 26px rgba(10,20,15,.14)}
+    .navlinks{display:flex;align-items:center;gap:24px;font-size:13px;font-weight:800}
+    .navlinks a{opacity:.72;transition:.2s}.navlinks a:hover{opacity:1}.navcta{padding:10px 16px;border-radius:999px;background:var(--dark);color:#fff;opacity:1!important}
+    .hero{position:relative;padding:48px 0 24px;overflow:hidden;min-height:980px}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:30px;align-items:center;min-height:860px}
+    .hero-copy{position:relative;z-index:3}.hero-copy .stickers{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+    .hero h1{margin:18px 0 24px;font-size:clamp(60px,8vw,128px);line-height:.88;letter-spacing:-.075em;font-weight:990}
+    .hero h1 .accent{position:relative;display:inline-block;z-index:1}.hero h1 .accent::after{content:"";position:absolute;left:-1%;right:-1%;bottom:4px;height:18px;border-radius:999px;background:var(--green);z-index:-1;transform:rotate(-1.5deg)}
+    .hero p{font-size:18px;color:var(--muted);max-width:690px;margin-bottom:30px}
+    .hero-visual{position:relative;min-height:830px}
+    .canvas{position:absolute;inset:0;background:radial-gradient(circle at 16% 16%, rgba(217,255,87,.92), transparent 17%),radial-gradient(circle at 83% 16%, rgba(137,239,228,.92), transparent 20%),radial-gradient(circle at 81% 78%, rgba(212,183,255,.84), transparent 22%),radial-gradient(circle at 16% 78%, rgba(255,162,130,.78), transparent 20%),linear-gradient(160deg,#ffffff 0%, #edf7f2 100%);border:1px solid rgba(13,22,20,.08);border-radius:48px;overflow:hidden;box-shadow:var(--shadow)}
+    .grid-noise{position:absolute;inset:0;background-image:linear-gradient(rgba(13,22,20,.035) 1px, transparent 1px),linear-gradient(90deg, rgba(13,22,20,.035) 1px, transparent 1px);background-size:26px 26px;mask-image:linear-gradient(180deg,rgba(0,0,0,.25),transparent 92%);pointer-events:none}
+    .orbit{position:absolute;border-radius:50%;border:1.4px solid rgba(13,22,20,.16);animation:spin 26s linear infinite}
+    .o1{width:320px;height:320px;left:48%;top:44%;transform:translate(-50%,-50%)} .o2{width:520px;height:520px;left:50%;top:49%;transform:translate(-50%,-50%);animation-duration:38s;animation-direction:reverse} .o3{width:700px;height:700px;left:53%;top:53%;transform:translate(-50%,-50%);animation-duration:58s}
+    .dot{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--dark);box-shadow:0 0 0 7px rgba(255,255,255,.65)} .d1{left:14%;top:18%}.d2{right:14%;top:30%}.d3{left:21%;bottom:18%}.d4{right:28%;bottom:14%}
+    .scene{position:absolute;inset:0;padding:26px}.scene svg{position:absolute}
+    .orca{width:80%;left:10%;top:23%;filter:drop-shadow(0 28px 40px rgba(10,20,15,.12))} .jelly{width:20%;left:4%;top:9%} .bird{width:18%;right:6%;top:12%} .frog{width:19%;left:7%;bottom:10%} .flower{width:22%;right:4%;bottom:8%} .fish{width:16%;right:20%;bottom:26%} .butterfly{width:16%;left:24%;top:8%} .turtle{width:19%;left:13%;bottom:29%} .chameleon{width:18%;right:11%;top:47%} .leaf{width:18%;right:30%;top:6%}
+    .note{position:absolute;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.78);backdrop-filter:blur(12px);box-shadow:0 16px 42px rgba(13,22,20,.08);border-radius:18px;padding:14px 15px;font-size:12px;font-weight:800}
+    .note strong{display:block;font-size:16px;line-height:1.15;margin-bottom:4px} .n1{top:24px;right:22px;width:200px} .n2{left:22px;bottom:26px;width:220px} .n3{right:24px;bottom:112px;width:184px}
+    .hero-badges{position:absolute;left:20px;top:22px;display:flex;flex-direction:column;gap:10px}
+    .hero-bottom{margin-top:-18px;position:relative;z-index:3} .hero-panels{display:grid;grid-template-columns:1.18fr .82fr .82fr;gap:16px}
+    .panel{padding:20px;border-radius:24px;background:rgba(255,255,255,.76);border:1px solid rgba(13,22,20,.08);backdrop-filter:blur(16px);box-shadow:0 18px 48px rgba(13,22,20,.05);min-height:132px}
+    .panel b{display:block;font-size:12px;letter-spacing:.14em;margin-bottom:10px}.panel strong{display:block;font-size:31px;line-height:1.05;letter-spacing:-.04em}.panel p{margin-top:8px;color:var(--muted);font-size:13px}
+    .section-head{display:grid;grid-template-columns:.72fr 1.28fr;gap:38px;align-items:start;margin-bottom:46px}
+    .about-grid{display:grid;grid-template-columns:1.06fr .94fr;gap:18px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:0 18px 48px rgba(13,22,20,.04);overflow:hidden}
+    .about-card{padding:34px;min-height:370px;position:relative} .about-card h3{font-size:36px;line-height:1.08;letter-spacing:-.04em;margin-bottom:16px}.about-card p{color:var(--muted);max-width:600px}
+    .tagline{background:linear-gradient(160deg,#0d1514 0%, #15211f 100%);color:#fff;position:relative;min-height:420px;padding:34px;display:flex;flex-direction:column;justify-content:space-between}
+    .tagline p{color:rgba(255,255,255,.70)} .tagline .big{font-size:48px;line-height:1.08;font-weight:980;letter-spacing:-.06em;max-width:520px}
+    .mini-svg-row{position:absolute;right:18px;bottom:18px;display:flex;gap:10px}
+    .mini-svg-row .mini{width:74px;height:74px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);display:grid;place-items:center}
+    .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+    .decor-surface{position:absolute;right:-40px;top:-20px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle, rgba(137,239,228,.55), transparent 65%);pointer-events:none}
+    .illustration-showcase{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:26px}
+    .illus-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:0 18px 48px rgba(13,22,20,.04);min-height:260px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+    .illus-card h4{font-size:15px;letter-spacing:.08em;text-transform:uppercase}.illus-card p{font-size:13px;color:var(--muted);margin-top:8px}
+    .illus-stage{margin-top:20px;min-height:145px;border-radius:22px;display:grid;place-items:center;border:1px solid rgba(13,22,20,.08);background:linear-gradient(160deg,#ffffff 0%, #f3faf5 100%)}
+    .business{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.72));border-top:1px solid rgba(13,22,20,.05);border-bottom:1px solid rgba(13,22,20,.05)}
+    .business-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .bcard{padding:26px;border-radius:32px;background:#fff;border:1px solid var(--line);box-shadow:0 18px 56px rgba(13,22,20,.05);min-height:454px;display:flex;flex-direction:column;justify-content:space-between;transition:.25s ease;overflow:hidden}
+    .bcard:hover{transform:translateY(-5px);box-shadow:0 26px 70px rgba(13,22,20,.08)} .bcard small{display:block;font-size:11px;font-weight:900;letter-spacing:.16em;margin-bottom:14px;color:#56867c} .bcard h3{font-size:36px;line-height:1.02;letter-spacing:-.045em;margin-bottom:12px} .bcard p{color:var(--muted)}
+    .b-illus{height:190px;margin-top:18px;border-radius:28px;overflow:hidden;border:1px solid rgba(13,22,20,.07);display:grid;place-items:center}.b1 .b-illus{background:linear-gradient(145deg,#F2FDFA,#F8FBFF)} .b2 .b-illus{background:linear-gradient(145deg,#FCFFE8,#FFFFFF)} .b3 .b-illus{background:linear-gradient(145deg,#FAF4FF,#FFFFFF)}
+    .pill{display:inline-flex;align-self:flex-start;padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:11px;font-weight:900}
+    .numbers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}.numcard{background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px}.numcard b{display:block;font-size:12px;letter-spacing:.14em;color:#668477}.numcard strong{display:block;font-size:50px;line-height:1;font-weight:980;margin:18px 0 10px}.numcard span{display:block;color:var(--muted);font-size:14px}
+    .founder{background:linear-gradient(160deg,#0d1514 0%, #13201d 100%);color:#fff;position:relative;overflow:hidden}.founder::before,.founder::after{content:"";position:absolute;border-radius:50%;filter:blur(10px)} .founder::before{left:-10%;top:-10%;width:420px;height:420px;background:rgba(217,255,87,.12)} .founder::after{right:-8%;bottom:-10%;width:390px;height:390px;background:rgba(137,239,228,.12)}
+    .founder-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:48px;align-items:center;position:relative;z-index:1}
+    .portrait{min-height:640px;border-radius:40px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.10);background:radial-gradient(circle at 18% 18%, rgba(217,255,87,.94), transparent 20%),radial-gradient(circle at 84% 22%, rgba(137,239,228,.92), transparent 22%),radial-gradient(circle at 74% 84%, rgba(212,183,255,.78), transparent 24%),linear-gradient(180deg,#ecf6f2,#daebe4)}
+    .portrait svg{position:absolute;inset:5% 8% 0;width:84%;height:94%;filter:drop-shadow(0 24px 30px rgba(0,0,0,.10))}
+    .founder .tiny{color:#91dccc}.founder .lead{color:rgba(255,255,255,.70)} .founder h2{font-size:clamp(42px,5vw,78px)} .founder-name{margin-top:30px;font-size:30px;font-weight:980} .founder-role{font-size:13px;color:rgba(255,255,255,.58);margin-top:4px} .founder-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.founder-tags .chip{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:#fff}
+    .company-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.company-card{background:#fff;border:1px solid var(--line);border-radius:34px;padding:30px;box-shadow:0 18px 46px rgba(13,22,20,.04)} .company-card h3{font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:#5e8176} .profile{display:grid;gap:0;margin-top:16px}
+    .row{display:grid;grid-template-columns:130px 1fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--line)} .row:last-child{border-bottom:0} .row dt{font-size:12px;color:var(--muted);font-weight:800} .row dd{margin:0;font-weight:800}
+    .mission{background:radial-gradient(circle at 12% 14%, rgba(217,255,87,.78), transparent 24%),radial-gradient(circle at 86% 18%, rgba(137,239,228,.78), transparent 24%),radial-gradient(circle at 76% 88%, rgba(255,162,130,.42), transparent 24%),#fff}
+    .mission .big{margin-top:16px;font-size:44px;line-height:1.08;font-weight:980;letter-spacing:-.055em;max-width:540px}.mission p{margin-top:16px;color:var(--muted);max-width:560px}
+    .contact-card{position:relative;overflow:hidden;text-align:center;padding:58px;border-radius:42px;border:1px solid var(--line);background:radial-gradient(circle at 12% 16%, rgba(217,255,87,.88), transparent 22%),radial-gradient(circle at 88% 20%, rgba(137,239,228,.88), transparent 22%),radial-gradient(circle at 76% 86%, rgba(212,183,255,.64), transparent 23%),linear-gradient(160deg,#ffffff 0%, #f3faf5 100%);box-shadow:var(--shadow)}
+    .contact-card h2{max-width:900px;margin-inline:auto}.contact-card p{max-width:720px;margin:20px auto 30px;color:var(--muted)} .contact-icons{position:absolute;left:20px;bottom:20px;display:flex;gap:10px} .bubble{width:70px;height:70px;border-radius:20px;display:grid;place-items:center;background:rgba(255,255,255,.76);border:1px solid rgba(13,22,20,.08);backdrop-filter:blur(8px)}
+    footer{padding:34px 0 54px}.footer-grid{border-top:1px solid rgba(13,22,20,.10);padding-top:24px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end} .footer-brand{display:flex;align-items:center;gap:12px}.footer-brand b{font-size:24px;letter-spacing:.12em}.footer-meta{font-size:12px;color:var(--muted);text-align:right}
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .75s ease, transform .75s ease}.reveal.show{opacity:1;transform:none}
+    @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+    @media (max-width:1080px){.hero-grid,.section-head,.about-grid,.founder-grid,.company-grid{grid-template-columns:1fr}.hero-panels,.business-grid,.numbers,.illustration-showcase{grid-template-columns:1fr 1fr}.section{padding:86px 0}.hero{min-height:auto}.hero-visual{min-height:720px}}
+    @media (max-width:760px){.wrap{width:min(100% - 22px, var(--max))}.navlinks a:not(.navcta){display:none}.hero{padding-top:36px}.hero-grid{min-height:auto}.hero h1{font-size:clamp(54px,15vw,86px)}.hero p{font-size:16px}.hero-visual{min-height:650px}.canvas{border-radius:32px}.scene{padding:16px}.orca{width:92%;left:4%;top:32%}.jelly{width:24%;left:1%;top:10%}.bird{width:22%;right:1%;top:10%}.frog{width:22%;left:1%;bottom:8%}.flower{width:28%;right:1%;bottom:6%}.fish{width:20%;right:16%;bottom:26%}.butterfly{width:20%;left:18%;top:12%}.turtle{width:21%;left:11%;bottom:30%}.chameleon{width:20%;right:8%;top:48%}.leaf{width:18%;right:27%;top:7%}.note,.hero-badges{display:none}.hero-panels,.business-grid,.numbers,.illustration-showcase{grid-template-columns:1fr}.section{padding:66px 0}h2{font-size:clamp(36px,12vw,58px)}.tagline .big{font-size:40px}.bcard h3{font-size:30px}.portrait{min-height:470px}.contact-card{padding:40px 22px}.contact-icons{display:none}.footer-grid{flex-direction:column;align-items:flex-start}.footer-meta{text-align:left}.row{grid-template-columns:100px 1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#top"><span class="logo-mark"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 13c3-4 8-6 12-6 3 0 5 1 7 3-2 2-3 5-6 7-3 2-7 3-11 2 1-1 2-3 2-6 0 2-2 4-4 5-1-1-1-3 0-5Z"/></svg></span>AQZOO</a>
+    <nav class="navlinks"><a href="#about">ABOUT</a><a href="#illustrations">ILLUSTRATIONS</a><a href="#business">BUSINESS</a><a href="#company">COMPANY</a><a href="#contact" class="navcta">CONTACT</a></nav>
+  </div>
+</header>
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy reveal">
+        <div class="stickers"><span class="sticker green">BIO CREATIVE COMPANY</span><span class="sticker white">Nature × Entertainment × Technology</span></div>
+        <div class="tiny">Aqzoo Brand Site</div>
+        <h1>生き物の価値を、<br><span class="accent">次の事業</span>と体験へ。</h1>
+        <p>Aqzooは、自然・生き物の価値を、クリエイティブ、テクノロジー、事業開発で社会へひらくスタートアップです。水族館・動物園、企業、自治体、教育、人材を横断し、関わりたくなる体験と、新しい経済の循環をつくります。</p>
+        <div class="btns"><a class="btn dark" href="#illustrations">イラストを見る ↗</a><a class="btn green" href="#contact">一緒につくる</a></div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="canvas">
+          <div class="grid-noise"></div><div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit o3"></div><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span>
+          <div class="hero-badges"><span class="sticker aqua">ZOO / AQUARIUM</span><span class="sticker pink">NATURE POSITIVE</span><span class="sticker white">BIO CAREER TECH</span></div>
+          <div class="scene">
+            <svg class="jelly" viewBox="0 0 220 300" aria-hidden="true"><defs><linearGradient id="jg1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#A3FFF2"/><stop offset="100%" stop-color="#5CDACB"/></linearGradient></defs><path d="M110 35c-42 0-77 31-77 72 0 19 7 36 19 49h116c12-13 19-30 19-49 0-41-35-72-77-72Z" fill="url(#jg1)" stroke="#0D1614" stroke-width="6"/><path d="M57 156c16 15 37 24 53 24s37-9 53-24" fill="none" stroke="#0D1614" stroke-width="5" stroke-linecap="round"/><path d="M70 176c0 32-8 61-17 92M95 178c2 36-1 70-8 103M121 178c0 36 2 69 9 101M148 174c7 31 16 60 26 88" fill="none" stroke="#0D1614" stroke-width="7" stroke-linecap="round"/><circle cx="90" cy="95" r="7" fill="#0D1614"/><circle cx="130" cy="95" r="7" fill="#0D1614"/><path d="M94 123c10 8 22 8 32 0" fill="none" stroke="#0D1614" stroke-width="5" stroke-linecap="round"/></svg>
+            <svg class="bird" viewBox="0 0 260 220" aria-hidden="true"><path d="M45 121c27-26 68-44 109-44 29 0 58 10 79 28-19 2-37 10-49 22-22 1-44 7-66 17-33-3-57-18-73-35Z" fill="#FFE47E" stroke="#0D1614" stroke-width="7" stroke-linejoin="round"/><path d="M122 109c-10-19-28-31-49-38 11 24 16 41 14 57" fill="#FFD03D" stroke="#0D1614" stroke-width="6" stroke-linejoin="round"/><path d="M191 120c17 2 32 10 46 22-23 0-42 5-55 11" fill="#FFA282" stroke="#0D1614" stroke-width="6" stroke-linejoin="round"/><circle cx="175" cy="108" r="6" fill="#0D1614"/><path d="M201 111l24 8-25 7Z" fill="#0D1614"/><path d="M93 147c-10 11-17 25-19 40M131 156c-6 12-8 25-7 39" stroke="#0D1614" stroke-width="6" stroke-linecap="round"/></svg>
+            <svg class="frog" viewBox="0 0 260 220" aria-hidden="true"><ellipse cx="130" cy="132" rx="84" ry="54" fill="#D9FF57" stroke="#0D1614" stroke-width="7"/><circle cx="91" cy="82" r="24" fill="#D9FF57" stroke="#0D1614" stroke-width="7"/><circle cx="169" cy="82" r="24" fill="#D9FF57" stroke="#0D1614" stroke-width="7"/><circle cx="91" cy="82" r="11" fill="#fff"/><circle cx="169" cy="82" r="11" fill="#fff"/><circle cx="93" cy="83" r="5" fill="#0D1614"/><circle cx="171" cy="83" r="5" fill="#0D1614"/><path d="M102 154c14 11 42 11 56 0" fill="none" stroke="#0D1614" stroke-width="7" stroke-linecap="round"/><path d="M57 151c-20 10-31 24-38 43M203 151c20 9 31 23 38 42" fill="none" stroke="#0D1614" stroke-width="8" stroke-linecap="round"/><path d="M84 179c-11 8-18 18-21 30M176 179c12 7 19 17 22 29" fill="none" stroke="#0D1614" stroke-width="7" stroke-linecap="round"/></svg>
+            <svg class="flower" viewBox="0 0 240 240" aria-hidden="true"><circle cx="120" cy="120" r="28" fill="#FFE47E" stroke="#0D1614" stroke-width="6"/><ellipse cx="120" cy="52" rx="28" ry="42" fill="#FF97CB" stroke="#0D1614" stroke-width="6"/><ellipse cx="120" cy="188" rx="28" ry="42" fill="#FF97CB" stroke="#0D1614" stroke-width="6"/><ellipse cx="52" cy="120" rx="42" ry="28" fill="#FF97CB" stroke="#0D1614" stroke-width="6"/><ellipse cx="188" cy="120" rx="42" ry="28" fill="#FF97CB" stroke="#0D1614" stroke-width="6"/><ellipse cx="73" cy="73" rx="24" ry="34" transform="rotate(-45 73 73)" fill="#D4B7FF" stroke="#0D1614" stroke-width="6"/><ellipse cx="167" cy="73" rx="24" ry="34" transform="rotate(45 167 73)" fill="#D4B7FF" stroke="#0D1614" stroke-width="6"/><ellipse cx="73" cy="167" rx="24" ry="34" transform="rotate(45 73 167)" fill="#D4B7FF" stroke="#0D1614" stroke-width="6"/><ellipse cx="167" cy="167" rx="24" ry="34" transform="rotate(-45 167 167)" fill="#D4B7FF" stroke="#0D1614" stroke-width="6"/><path d="M120 149v80" stroke="#0D1614" stroke-width="8" stroke-linecap="round"/></svg>
+            <svg class="fish" viewBox="0 0 240 160" aria-hidden="true"><path d="M30 82c23-28 58-47 103-47 33 0 64 11 86 31-17 10-29 26-35 44-18 14-43 23-72 23-34 0-59-11-76-27-7 8-17 15-31 20 0-17 8-31 25-44Z" fill="#8AB9FF" stroke="#0D1614" stroke-width="7" stroke-linejoin="round"/><path d="M120 52c-5-13-14-23-26-30 1 14-2 27-10 40" fill="#6AA3F5" stroke="#0D1614" stroke-width="6" stroke-linejoin="round"/><path d="M102 105c17 8 42 9 59-1-14-2-26-8-38-18-7 9-14 15-21 19Z" fill="#fff"/><circle cx="149" cy="72" r="6" fill="#0D1614"/><path d="M203 61c11 6 21 16 28 28-10 10-19 17-30 22" fill="#6AA3F5" stroke="#0D1614" stroke-width="6" stroke-linejoin="round"/></svg>
+            <svg class="orca" viewBox="0 0 860 440" aria-hidden="true"><path d="M76 245c58-89 166-145 300-145 124 0 219 48 292 124 41 43 78 85 148 103-78 34-182 33-264-9-36-18-67-41-94-64-50 40-110 74-195 87-96 14-175-18-228-58 15-13 29-25 41-38Z" fill="#0D1614"/><path d="M334 92c-20-47-30-77-30-104 28 8 78 52 102 111" fill="#0D1614"/><path d="M563 163c24-26 53-40 87-40 28 0 55 10 76 28-43 1-79 15-109 38" fill="#0D1614"/><path d="M344 286c56-10 110-26 156-50 22 30 50 53 83 68-59 18-120 13-178-18-22 2-43 2-61 0Z" fill="#fff"/><path d="M470 193c20 15 41 18 61 17-9 11-19 19-34 25-16-3-27-17-27-42Z" fill="#fff"/><circle cx="621" cy="193" r="8" fill="#fff"/><path d="M221 310c-34 35-44 72-44 114 44-28 82-47 132-54" fill="#0D1614"/></svg>
+            <svg class="butterfly" viewBox="0 0 220 220" aria-hidden="true"><ellipse cx="70" cy="80" rx="42" ry="52" fill="#FF97CB" stroke="#0D1614" stroke-width="7"/><ellipse cx="150" cy="80" rx="42" ry="52" fill="#D4B7FF" stroke="#0D1614" stroke-width="7"/><ellipse cx="76" cy="152" rx="36" ry="28" fill="#FFE47E" stroke="#0D1614" stroke-width="7"/><ellipse cx="144" cy="152" rx="36" ry="28" fill="#89EFE4" stroke="#0D1614" stroke-width="7"/><rect x="101" y="58" width="18" height="102" rx="9" fill="#0D1614"/><path d="M107 54c-8-19-19-31-34-39M113 54c8-19 19-31 34-39" fill="none" stroke="#0D1614" stroke-width="6" stroke-linecap="round"/></svg>
+            <svg class="turtle" viewBox="0 0 260 180" aria-hidden="true"><ellipse cx="130" cy="100" rx="72" ry="48" fill="#89EFE4" stroke="#0D1614" stroke-width="7"/><path d="M130 58c25 0 46 18 46 42 0 2 0 4-.4 6H84c-.3-2-.4-4-.4-6 0-24 21-42 46-42Z" fill="#68D8CB" stroke="#0D1614" stroke-width="6"/><circle cx="55" cy="99" r="19" fill="#89EFE4" stroke="#0D1614" stroke-width="7"/><circle cx="50" cy="95" r="4" fill="#0D1614"/><ellipse cx="82" cy="60" rx="14" ry="10" fill="#89EFE4" stroke="#0D1614" stroke-width="6"/><ellipse cx="178" cy="60" rx="14" ry="10" fill="#89EFE4" stroke="#0D1614" stroke-width="6"/><ellipse cx="87" cy="141" rx="14" ry="10" fill="#89EFE4" stroke="#0D1614" stroke-width="6"/><ellipse cx="173" cy="141" rx="14" ry="10" fill="#89EFE4" stroke="#0D1614" stroke-width="6"/><path d="M191 102c20 0 30 10 38 22-17 1-31-5-40-14" fill="#89EFE4" stroke="#0D1614" stroke-width="6" stroke-linejoin="round"/><path d="M104 84h52M104 102h52M118 68l25 68M143 68l-25 68" stroke="#0D1614" stroke-width="4" opacity=".45"/></svg>
+            <svg class="chameleon" viewBox="0 0 240 220" aria-hidden="true"><path d="M42 122c11-28 41-47 74-47 41 0 75 29 75 62 0 22-15 41-37 48 10 7 17 19 17 31-25-2-44-17-55-39h-8c-31 0-57-17-66-42Z" fill="#D9FF57" stroke="#0D1614" stroke-width="7"/><circle cx="144" cy="93" r="18" fill="#fff" stroke="#0D1614" stroke-width="6"/><circle cx="148" cy="92" r="7" fill="#0D1614"/><path d="M184 119c16-8 30-9 43-5-10 11-24 17-40 18" fill="#D9FF57" stroke="#0D1614" stroke-width="6" stroke-linejoin="round"/><path d="M85 176c-6 13-16 25-28 35M126 177c0 15-3 29-9 40" fill="none" stroke="#0D1614" stroke-width="7" stroke-linecap="round"/><path d="M72 127c10 5 22 7 34 7 21 0 43-8 56-21" fill="none" stroke="#0D1614" stroke-width="5" stroke-linecap="round"/></svg>
+            <svg class="leaf" viewBox="0 0 220 220" aria-hidden="true"><path d="M185 29C92 34 45 93 45 142c0 32 22 53 51 53 57 0 101-68 89-166Z" fill="#D9FF57" stroke="#0D1614" stroke-width="7"/><path d="M76 154c36-34 63-58 103-95" fill="none" stroke="#0D1614" stroke-width="7" stroke-linecap="round"/><path d="M109 121c7-12 17-23 31-31M89 137c-10-6-21-9-34-10" fill="none" stroke="#0D1614" stroke-width="5" stroke-linecap="round" opacity=".5"/></svg>
+          </div>
+          <div class="note n1"><strong>Nature is an asset.</strong>自然は、CSRではなく、次の事業資産になる。</div>
+          <div class="note n2"><strong>Creative for bio world</strong>生き物の世界を、事業・体験・文化に翻訳する。</div>
+          <div class="note n3"><strong>AQZOO / 2026</strong>Zoo / Nature Positive / Talent</div>
+        </div>
       </div>
     </div>
-  );
-}
+    <div class="wrap hero-bottom reveal"><div class="hero-panels"><div class="panel"><b>POSITIONING</b><strong>生き物領域の<br>クリエイティブ集団</strong><p>生物・自然・地域・テック・デザインを横断し、新しい事業と表現をつくるチームです。</p></div><div class="panel"><b>METHOD</b><strong>企画 × 実装</strong><p>企画だけで終わらず、Web、映像、AI、イベントまで動かします。</p></div><div class="panel"><b>MISSION</b><strong>自然を、<br>経営資産へ。</strong><p>収益、教育、地域、キャリアへ接続し、持続する循環をつくります。</p></div></div></div>
+  </section>
 
-// 強化されたArtCanvasコンポーネント
-function ArtCanvas({ animal, label, compact = false }) {
-  return (
-    <motion.div 
-      className={classNames("relative overflow-hidden rounded-[24px] bg-gradient-to-br shadow-inner", animal.tones, compact ? "h-24" : "h-48")}
-      whileHover="hover"
-    >
-      {/* 背景の装飾 */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)]" />
-      </div>
-      
-      <motion.img
-        src={formatImageUrl(animal.type)}
-        className={classNames("absolute object-cover shadow-2xl border-2 border-white/30 rounded-2xl", compact ? "bottom-2 right-2 h-16 w-16" : "bottom-4 right-4 h-32 w-32")}
-        initial={{ y: 0, rotate: 0 }}
-        animate={{ 
-          y: [-8, 8, -8],
-          rotate: [-2, 2, -2]
-        }}
-        variants={{
-          hover: { 
-            scale: 1.1, 
-            rotate: 0,
-            transition: { duration: 0.3 }
-          }
-        }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
-      
-      {/* ラベルの装飾 */}
-      <div className="absolute inset-x-3 bottom-3">
-        <motion.div 
-          className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[9px] font-black text-white backdrop-blur-md border border-white/20 shadow-sm"
-          variants={{
-            hover: { x: 5 }
-          }}
-        >
-          {label}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
+  <section id="about" class="section">
+    <div class="wrap">
+      <div class="section-head reveal"><div><div class="tiny">01 / About Aqzoo</div></div><div><h2>生き物の価値を、<br>社会の循環へ。</h2><p class="lead">水族館や動物園、地域自然、そこで働く人たちが持つ価値は、まだ十分に事業化されていません。Aqzooは、企画・技術・デザイン・現場実装を一つにつなぎ、価値を持続可能な事業と体験へ変換します。</p></div></div>
+      <div class="about-grid"><article class="card about-card reveal"><div class="decor-surface"></div><h3>生き物の世界を、<br>もっと社会へひらく。</h3><p>私たちは、動物学や生物多様性への理解を前提にしながら、その価値を一般の人や企業、地域、教育現場に届く「形」へ編集します。企画だけでなく、Web、映像、AI、ワークショップ、コミュニティまで、自分たちで動かします。</p><div class="tags"><span class="chip">Biology</span><span class="chip">Creative</span><span class="chip">AI / Web</span><span class="chip">Fieldwork</span><span class="chip">Business Design</span></div></article><article class="card tagline reveal"><div><span class="sticker green">OUR STATEMENT</span><div class="big" style="margin-top:18px;">自然は、<br>経営資産だ。</div><p style="margin-top:18px;max-width:520px;">自然を「守る対象」で終わらせず、事業、教育、地域、雇用、体験の価値として社会実装する。</p></div><div class="mini-svg-row"><div class="mini"><svg viewBox="0 0 80 80" width="42" height="42" aria-hidden="true"><path fill="#D9FF57" stroke="#fff" stroke-width="2" d="M10 43c6-9 18-15 32-15 15 0 26 7 32 16 3 5 6 10 12 13-9 4-18 4-25 0-5-2-9-6-13-9-4 4-10 8-18 10-11 2-21-1-30-7 3-2 7-4 10-8Z"/></svg></div><div class="mini"><svg viewBox="0 0 80 80" width="42" height="42" aria-hidden="true"><path fill="#89EFE4" stroke="#fff" stroke-width="2" d="M16 40c0-12 8-21 17-21s17 9 17 21c0 5-2 9-5 13H21c-3-4-5-8-5-13Z"/><path d="M22 53c1 4 2 8 3 12m7-12c0 4 0 8 0 13m8-13c1 4 2 7 4 11" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></div><div class="mini"><svg viewBox="0 0 80 80" width="42" height="42" aria-hidden="true"><circle cx="40" cy="40" r="10" fill="#FFE47E"/><ellipse cx="40" cy="18" rx="10" ry="15" fill="#FF97CB"/><ellipse cx="40" cy="62" rx="10" ry="15" fill="#FF97CB"/><ellipse cx="18" cy="40" rx="15" ry="10" fill="#D4B7FF"/><ellipse cx="62" cy="40" rx="15" ry="10" fill="#D4B7FF"/></svg></div></div></article></div>
+    </div>
+  </section>
 
-function ScreenHeader({ title, subtitle, onBack, light = true }) {
-  return (
-    <div className="mt-4 flex items-start gap-3 px-4 mb-6">
-      {onBack && (
-        <motion.button 
-          onClick={onBack} 
-          className={classNames("mt-1 h-8 w-8 rounded-full border flex items-center justify-center transition", light ? "border-slate-200 bg-white text-slate-700 active:bg-slate-50" : "border-white/10 bg-white/10 text-white active:bg-white/20")}
-          whileTap={{ scale: 0.9 }}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </motion.button>
-      )}
-      <div className="min-w-0">
-        <motion.div 
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          className={classNames("text-xl font-black truncate", light ? "text-[#10233c]" : "text-white")}
-        >
-          {title}
-        </motion.div>
-        {subtitle && (
-          <motion.div 
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className={classNames("text-[11px] font-bold mt-0.5", light ? "text-slate-500" : "text-slate-300")}
-          >
-            {subtitle}
-          </motion.div>
-        )}
+  <section id="illustrations" class="section">
+    <div class="wrap">
+      <div class="section-head reveal"><div><div class="tiny">02 / Illustration Library</div></div><div><h2>生き物イラストを、<br>もっと前面に。</h2><p class="lead">トップだけでなく、サイト全体の世界観として生き物を感じられるよう、イラストの量と種類を増やしました。それぞれをステッカーのように見せることで、Aqzooらしい遊び心も強めています。</p></div></div>
+      <div class="illustration-showcase">
+        <article class="illus-card reveal"><div><h4>Marine</h4><p>シャチ・魚・クラゲなど、水の世界を象徴するモチーフ。</p></div><div class="illus-stage"><svg viewBox="0 0 240 150" width="170" height="110" aria-hidden="true"><path d="M20 82c19-29 54-46 97-46 40 0 72 15 95 41 13 15 25 28 46 35-27 12-59 11-85-2-12-6-22-14-31-23-16 13-36 27-66 34-31 7-56-4-74-17 6-5 11-11 18-22Z" fill="#0D1614"/><path d="M89 97c16 8 42 8 58-1-13-2-26-8-37-18-6 9-13 15-21 19Z" fill="#fff"/><circle cx="166" cy="69" r="5" fill="#fff"/></svg></div></article>
+        <article class="illus-card reveal"><div><h4>Forest</h4><p>カエルやカメレオンなど、森や湿地の生命感を表現。</p></div><div class="illus-stage"><svg viewBox="0 0 240 150" width="170" height="110" aria-hidden="true"><ellipse cx="72" cy="80" rx="34" ry="23" fill="#D9FF57" stroke="#0D1614" stroke-width="5"/><circle cx="57" cy="56" r="10" fill="#D9FF57" stroke="#0D1614" stroke-width="5"/><circle cx="88" cy="56" r="10" fill="#D9FF57" stroke="#0D1614" stroke-width="5"/><circle cx="59" cy="57" r="3" fill="#0D1614"/><circle cx="90" cy="57" r="3" fill="#0D1614"/><path d="M60 87c6 5 17 5 23 0" fill="none" stroke="#0D1614" stroke-width="5" stroke-linecap="round"/><path d="M137 74c8-19 28-32 50-32 27 0 50 19 50 42 0 15-10 28-25 33 7 5 12 12 12 21-17-1-30-11-37-27h-5c-21 0-38-11-45-27Z" fill="#89EFE4" stroke="#0D1614" stroke-width="5"/></svg></div></article>
+        <article class="illus-card reveal"><div><h4>Sky</h4><p>鳥や蝶など、軽やかでポップな印象をつくる存在。</p></div><div class="illus-stage"><svg viewBox="0 0 240 150" width="170" height="110" aria-hidden="true"><path d="M27 77c18-16 45-27 72-27 20 0 39 7 53 18-13 2-24 8-33 16-14 0-29 5-43 11-22-2-38-11-49-18Z" fill="#FFE47E" stroke="#0D1614" stroke-width="5"/><ellipse cx="165" cy="56" rx="19" ry="24" fill="#FF97CB" stroke="#0D1614" stroke-width="5"/><ellipse cx="201" cy="56" rx="19" ry="24" fill="#D4B7FF" stroke="#0D1614" stroke-width="5"/><ellipse cx="169" cy="90" rx="17" ry="13" fill="#FFE47E" stroke="#0D1614" stroke-width="5"/><ellipse cx="197" cy="90" rx="17" ry="13" fill="#89EFE4" stroke="#0D1614" stroke-width="5"/><rect x="179" y="44" width="8" height="38" rx="4" fill="#0D1614"/></svg></div></article>
+        <article class="illus-card reveal"><div><h4>Plants</h4><p>葉や花を入れることで、サイト全体の生態系感を補強。</p></div><div class="illus-stage"><svg viewBox="0 0 240 150" width="170" height="110" aria-hidden="true"><path d="M67 127V60" stroke="#0D1614" stroke-width="6" stroke-linecap="round"/><circle cx="67" cy="60" r="14" fill="#FFE47E" stroke="#0D1614" stroke-width="5"/><ellipse cx="67" cy="34" rx="14" ry="22" fill="#FF97CB" stroke="#0D1614" stroke-width="5"/><ellipse cx="67" cy="86" rx="14" ry="22" fill="#D4B7FF" stroke="#0D1614" stroke-width="5"/><path d="M190 20c-47 3-71 33-71 58 0 17 12 29 27 29 29 0 52-35 44-87Z" fill="#D9FF57" stroke="#0D1614" stroke-width="5"/><path d="M139 84c19-18 34-31 51-50" fill="none" stroke="#0D1614" stroke-width="5" stroke-linecap="round"/></svg></div></article>
       </div>
     </div>
-  );
-}
+  </section>
 
-function SurfaceCard({ children, className = "", dark = false }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2 }}
-      className={classNames("rounded-[24px] border p-4 shadow-glass transition-all duration-300", dark ? "bg-white/10 border-white/10 text-white backdrop-blur" : "bg-white/80 border-white/40 text-[#11284f] backdrop-blur-md", className)}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// --- 各画面コンポーネント ---
-
-function HomeScreen({ selectedAnimal, onSelectAnimal, onTabSelect }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="h-full bg-[linear-gradient(180deg,#08203b_0%,#10375e_100%)] text-white overflow-y-auto pb-24 hide-scrollbar"
-    >
-      <StatusBar />
-      <div className="px-4 mt-6">
-        <div className="flex items-center justify-between">
-          <div className="text-xl font-black tracking-tight">Aqzoo</div>
-          <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center border border-white/10"><Bell className="h-4 w-4" /></div>
-        </div>
-        
-        <motion.div 
-          className="mt-8 p-6 rounded-[32px] bg-white/10 border border-white/10 backdrop-blur-xl shadow-aqua"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 100 }}
-        >
-          <div className="text-3xl font-black leading-tight">あなたの「推し」を、<br/>毎月応援できる。</div>
-          <motion.button 
-            onClick={() => onTabSelect("discover")} 
-            className="mt-6 w-full bg-white text-[#08203b] py-3.5 rounded-[18px] font-black text-sm shadow-lg transition"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            生きものを探す
-          </motion.button>
-        </motion.div>
-        
-        <div className="mt-8">
-          <ArtCanvas animal={selectedAnimal} label={`${selectedAnimal.nickname} の近況`} />
-        </div>
-        
-        <div className="mt-8 grid grid-cols-2 gap-3">
-          {animals.slice(0, 4).map((a, idx) => (
-            <motion.button 
-              key={a.id} 
-              onClick={() => onSelectAnimal(a.id)} 
-              className="text-left rounded-[24px] bg-white/5 border border-white/5 p-2 backdrop-blur transition shadow-sm"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <ArtCanvas animal={a} label={a.name} compact />
-              <div className="mt-2 px-1">
-                <div className="text-[11px] font-black truncate">{findFacility(a.facilityId)?.name}</div>
-                <div className="text-[9px] text-slate-400 mt-0.5">{formatYen(a.price)} / 月〜</div>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+  <section id="business" class="section business">
+    <div class="wrap">
+      <div class="section-head reveal"><div><div class="tiny">03 / Business</div></div><div><h2>3つの事業で、<br>価値をひらく。</h2><p class="lead">施設の成長、自然資本の社会実装、そして生き物業界の人材循環。Aqzooは単一プロダクトではなく、複数のレイヤーから業界全体の価値を拡張します。</p></div></div>
+      <div class="business-grid">
+        <article class="bcard b1 reveal"><div><small>01 / ZOO & AQUARIUM DX</small><h3>園館DX</h3><p>映像・AI・ファン体験を組み合わせ、来館前後まで続く顧客接点と新しい収益モデルをつくります。</p><div class="b-illus"><svg viewBox="0 0 360 190" width="100%" height="100%" aria-hidden="true"><rect x="28" y="26" width="304" height="138" rx="26" fill="#fff" stroke="rgba(13,22,20,.08)"/><rect x="50" y="44" width="260" height="98" rx="18" fill="#F1FBFF"/><path d="M76 90c19-22 40-35 68-35 22 0 40 8 56 20-10 7-17 17-22 29-12 10-29 16-48 16-22 0-36-6-48-14-3 4-8 9-15 13 0-11 3-20 9-29Z" fill="#8AB9FF"/><circle cx="154" cy="84" r="4" fill="#0D1614"/><rect x="209" y="59" width="76" height="11" rx="5.5" fill="#89EFE4"/><rect x="209" y="80" width="58" height="11" rx="5.5" fill="#D9FF57"/><rect x="209" y="101" width="74" height="11" rx="5.5" fill="#D4B7FF"/></svg></div></div><span class="pill">配信 / 推し活 / AI解析 / PoC</span></article>
+        <article class="bcard b2 reveal"><div><small>02 / NATURE POSITIVE</small><h3>企業・地域共創</h3><p>生物多様性や地域自然を、企業活動・教育・地域施策へ接続。調査、企画、実装、発信まで設計します。</p><div class="b-illus"><svg viewBox="0 0 360 190" width="100%" height="100%" aria-hidden="true"><circle cx="98" cy="96" r="42" fill="#D9FF57"/><path d="M98 95c23-23 41-37 70-58" stroke="#0D1614" stroke-width="8" stroke-linecap="round"/><path d="M146 59c7 10 12 22 12 38" stroke="#0D1614" stroke-width="8" stroke-linecap="round"/><rect x="188" y="43" width="124" height="96" rx="20" fill="#fff" stroke="rgba(13,22,20,.08)"/><rect x="212" y="65" width="70" height="10" rx="5" fill="#89EFE4"/><rect x="212" y="85" width="52" height="10" rx="5" fill="#D9FF57"/><rect x="212" y="105" width="82" height="10" rx="5" fill="#FFA282"/></svg></div></div><span class="pill">調査 / 教育 / 企画 / フィールド</span></article>
+        <article class="bcard b3 reveal"><div><small>03 / BIO CAREER TECH</small><h3>生き物人材</h3><p>動物園・水族館・博物館・自然関連企業など、生き物業界に特化した採用・キャリア基盤を構築します。</p><div class="b-illus"><svg viewBox="0 0 360 190" width="100%" height="100%" aria-hidden="true"><rect x="38" y="44" width="284" height="102" rx="22" fill="#fff" stroke="rgba(13,22,20,.08)"/><circle cx="88" cy="95" r="24" fill="#D4B7FF"/><path d="M80 95c6-8 17-14 28-14 10 0 18 4 24 10-5 2-8 6-10 11-4 3-9 5-16 5-8 0-13-2-19-5-2 2-4 4-7 5 0-4 0-8 0-12Z" fill="#0D1614"/><rect x="129" y="72" width="73" height="10" rx="5" fill="#8AB9FF"/><rect x="129" y="92" width="118" height="10" rx="5" fill="#89EFE4"/><rect x="129" y="112" width="92" height="10" rx="5" fill="#D9FF57"/></svg></div></div><span class="pill">求人 / 採用 / 人材 / コミュニティ</span></article>
       </div>
-      <BottomNav active="home" onSelect={onTabSelect} />
-    </motion.div>
-  );
-}
-
-function DiscoverScreen({ step, category, facilityId, onSelectCategory, onSelectFacility, onSelectAnimal, onTabSelect, onBack }) {
-  const filteredFacilities = facilities.filter(f => f.category === category);
-  const filteredAnimals = animals.filter(a => a.facilityId === facilityId);
-  
-  const bgClass = category === "aquarium" ? "bg-[linear-gradient(180deg,#004e92_0%,#000428_100%)]" : category === "zoo" ? "bg-[linear-gradient(180deg,#134e5e_0%,#71b280_100%)]" : "bg-[#f7fbff]";
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className={classNames("h-full pb-24 overflow-y-auto hide-scrollbar transition-colors duration-500", bgClass)}
-    >
-      <StatusBar light={!category} />
-      <ScreenHeader 
-        title={step === "category" ? "さがす" : step === "facility" ? (category === "aquarium" ? "水族館を選ぶ" : "動物園を選ぶ") : findFacility(facilityId)?.name} 
-        subtitle={step === "category" ? "施設の種類から選ぶ" : step === "facility" ? "気になる施設を選んでください" : "この施設で暮らす仲間たち"} 
-        onBack={onBack} 
-        light={!category} 
-      />
-      <div className="px-4">
-        <AnimatePresence mode="wait">
-          {step === "category" && (
-            <motion.div 
-              key="category"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="grid gap-4 mt-4"
-            >
-              <motion.button 
-                onClick={() => onSelectCategory("aquarium")} 
-                className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-600 to-cyan-400 p-6 text-left text-white shadow-lg transition"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Waves className="absolute -right-4 -top-4 h-32 w-32 opacity-20" />
-                <div className="text-2xl font-black">水族館</div>
-              </motion.button>
-              <motion.button 
-                onClick={() => onSelectCategory("zoo")} 
-                className="relative h-40 overflow-hidden rounded-[32px] bg-gradient-to-br from-emerald-600 to-lime-400 p-6 text-left text-white shadow-lg transition"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Trees className="absolute -right-4 -top-4 h-32 w-32 opacity-20" />
-                <div className="text-2xl font-black">動物園</div>
-              </motion.button>
-            </motion.div>
-          )}
-          
-          {step === "facility" && (
-            <motion.div 
-              key="facility"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="grid gap-3"
-            >
-              {filteredFacilities.map((f, idx) => (
-                <motion.button 
-                  key={f.id} 
-                  onClick={() => onSelectFacility(f.id)} 
-                  className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-5 text-left backdrop-blur-md text-white shadow-xl transition"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  whileHover={{ x: 5, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center"><Building2 className="h-6 w-6" /></div>
-                  <div className="flex-1 min-w-0"><div className="text-base font-black">{f.name}</div><div className="mt-1 flex items-center gap-1 text-[11px] opacity-70"><MapPin className="h-3 w-3" />{f.location}</div></div>
-                  <ChevronRight className="h-5 w-5 opacity-40" />
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-          
-          {step === "animal" && (
-            <motion.div 
-              key="animal"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="grid gap-4"
-            >
-              {filteredAnimals.map((a, idx) => (
-                <motion.button 
-                  key={a.id} 
-                  onClick={() => onSelectAnimal(a.id)} 
-                  className="flex items-center gap-4 rounded-[28px] bg-white/10 border border-white/20 p-4 text-left backdrop-blur-md text-white shadow-xl transition"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  whileHover={{ x: 5, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-black text-cyan-200 uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
-                    <div className="mt-1 text-lg font-black leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
-                  </div>
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      <BottomNav active="discover" onSelect={onTabSelect} />
-    </motion.div>
-  );
-}
-
-function ReportsScreen({ onTabSelect }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar"
-    >
-      <StatusBar light />
-      <ScreenHeader title="活動レポート" subtitle="写真、記録、近況を追えます。" />
-      <div className="px-4 grid gap-4">
-        {reports.map((r, idx) => {
-          const a = findAnimal(r.animalId);
-          return (
-            <SurfaceCard key={r.id} className="flex gap-4 p-5" transition={{ delay: idx * 0.1 }}>
-              <div className="w-24 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[9px] font-black text-[#5a78b5] uppercase tracking-widest">{r.category} • {r.date}</div>
-                <div className="mt-1 text-sm font-black text-[#11284f]">{r.title}</div>
-                <p className="mt-1 text-[11px] text-slate-500 leading-relaxed">{r.excerpt}</p>
-              </div>
-            </SurfaceCard>
-          );
-        })}
-      </div>
-      <BottomNav active="reports" onSelect={onTabSelect} />
-    </motion.div>
-  );
-}
-
-function MemberScreen({ supportedAnimalId, onTabSelect }) {
-  const animal = findAnimal(supportedAnimalId) || animals[0];
-  const facility = findFacility(animal.facilityId);
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar"
-    >
-      <StatusBar light />
-      <ScreenHeader title="会員証" subtitle="応援プランの確認と現地特典" />
-      <div className="px-4">
-        <motion.div 
-          className="rounded-[30px] bg-gradient-to-br from-[#08203b] via-[#143d70] to-[#081a30] p-7 text-white shadow-2xl relative overflow-hidden"
-          whileHover={{ scale: 1.02 }}
-        >
-          {/* 背景の光の装飾 */}
-          <motion.div 
-            className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl"
-            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 5, repeat: Infinity }}
-          />
-          
-          <div className="flex justify-between items-start relative z-10">
-            <div><div className="text-2xl font-black">Aqzoo</div><div className="text-[10px] opacity-60 mt-1 uppercase tracking-widest">Supporter Card</div></div>
-            <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-[9px] font-black border border-emerald-500/30 text-emerald-400">ACTIVE</div>
-          </div>
-          <div className="mt-12 flex justify-between items-end relative z-10">
-            <div><div className="text-xl font-black">山田 太郎</div><div className="text-[11px] opacity-60 mt-1">ID: AQZ-998822</div><div className="text-[11px] text-cyan-200 mt-3 font-black">{facility.name}の{animal.name}を応援中</div></div>
-            <motion.div 
-              className="bg-white p-3 rounded-2xl text-[#08203b] shadow-xl"
-              whileHover={{ rotate: 5, scale: 1.1 }}
-            >
-              <QrCode className="h-12 w-12" />
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
-      <BottomNav active="member" onSelect={onTabSelect} />
-    </motion.div>
-  );
-}
-
-function MyPageScreen({ followedAnimals, supportedAnimals, onSelectAnimal, onTabSelect }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="h-full bg-[#f7fbff] pb-24 overflow-y-auto hide-scrollbar"
-    >
-      <StatusBar light />
-      <ScreenHeader title="マイページ" subtitle="あなたのお気に入り・応援状況" />
-      <div className="px-4">
-        <motion.div 
-          className="rounded-[32px] bg-gradient-to-br from-[#08203b] to-[#1656d9] p-6 text-white shadow-xl flex items-center gap-5"
-          whileHover={{ y: -5 }}
-        >
-          <div className="h-16 w-16 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner"><User className="h-9 w-9" /></div>
-          <div><div className="text-xl font-black">山田 太郎さん</div><div className="text-[11px] opacity-70 mt-1">サポーター会員 ID: 000345</div></div>
-        </motion.div>
-
-        <div className="mt-10">
-          <div className="flex items-center justify-between mb-5">
-            <div className="text-xs font-black text-slate-400 uppercase tracking-widest">応援中の生きもの</div>
-            <div className="text-[10px] font-black text-[#1656d9] bg-[#eaf1ff] px-2 py-0.5 rounded-full">{supportedAnimals.length}件</div>
-          </div>
-          <div className="grid gap-4">
-            {supportedAnimals.length > 0 ? supportedAnimals.map((a, idx) => (
-              <motion.button 
-                key={a.id} 
-                onClick={() => onSelectAnimal(a.id)} 
-                className="flex items-center gap-4 rounded-[28px] border-2 border-[#1656d9] bg-white p-4 text-left shadow-md transition"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ x: 5 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="w-20 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-black text-[#1656d9] uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
-                  <div className="text-base font-black text-[#11284f] leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
-                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-black text-[#1656d9] bg-[#eaf1ff] px-2 py-0.5 rounded-full">応援中</div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-[#1656d9]" />
-              </motion.button>
-            )) : <div className="p-8 text-center text-slate-400 text-xs font-bold border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50/50">応援中の生きものはいません</div>}
-          </div>
-        </div>
-
-        <div className="mt-10">
-          <div className="flex items-center justify-between mb-5">
-            <div className="text-xs font-black text-slate-400 uppercase tracking-widest">推しにしている生きもの</div>
-            <div className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{followedAnimals.length}件</div>
-          </div>
-          <div className="grid gap-4">
-            {followedAnimals.length > 0 ? followedAnimals.map((a, idx) => (
-              <motion.button 
-                key={a.id} 
-                onClick={() => onSelectAnimal(a.id)} 
-                className="flex items-center gap-4 rounded-[28px] border border-slate-200 bg-white p-4 text-left shadow-sm transition"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ x: 5 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="w-20 shrink-0"><ArtCanvas animal={a} label={a.name} compact /></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-black text-[#1656d9] uppercase tracking-wider">{findFacility(a.facilityId)?.name}</div>
-                  <div className="text-base font-black text-[#11284f] leading-tight">{findFacility(a.facilityId)?.name}の{a.name}</div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-slate-200" />
-              </motion.button>
-            )) : <div className="p-8 text-center text-slate-400 text-xs font-bold border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50/50">推しの生きものはいません</div>}
-          </div>
-        </div>
-      </div>
-      <BottomNav active="mypage" onSelect={onTabSelect} />
-    </motion.div>
-  );
-}
-
-function DetailScreen({ animal, followed, onToggleFollow, onOpenSupport, onBack }) {
-  const facility = findFacility(animal.facilityId);
-  return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 1.1 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar"
-    >
-      <StatusBar light />
-      <ScreenHeader title="生き物詳細" subtitle={`${facility.name}の仲間`} onBack={onBack} />
-      <div className="px-4 mt-4">
-        <ArtCanvas animal={animal} label={facility.name} />
-        <div className="mt-6 flex items-start justify-between">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="text-2xl font-black text-[#10233c] leading-tight">{facility.name}の<br/>{animal.name}</div>
-            <div className="mt-2 text-sm font-bold text-slate-500">{animal.nickname}</div>
-          </motion.div>
-          <motion.button 
-            onClick={onToggleFollow} 
-            className={classNames("h-12 w-12 rounded-full border flex items-center justify-center transition shadow-sm", followed ? "border-[#ffd2ca] bg-[#fff0ec] text-[#ff7f68]" : "border-slate-200 bg-white text-slate-400")}
-            whileTap={{ scale: 0.8 }}
-          >
-            <Heart className={classNames("h-6 w-6", followed ? "fill-current" : "")} />
-          </motion.button>
-        </div>
-        <SurfaceCard className="mt-8 p-6 shadow-md" transition={{ delay: 0.3 }}>
-          <div className="text-[10px] font-black text-[#5a78b5] uppercase tracking-widest mb-3">概要</div>
-          <p className="text-sm leading-7 text-slate-600">{animal.summary}</p>
-        </SurfaceCard>
-        <motion.button 
-          onClick={onOpenSupport} 
-          className="mt-8 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-xl transition"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          この子を応援する
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-}
-
-function SupportScreen({ animal, selectedPlanId, onSelectPlan, onBack, onConfirm }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="h-full bg-[#f7fbff] overflow-y-auto pb-8 hide-scrollbar"
-    >
-      <StatusBar light />
-      <ScreenHeader title="応援プランを選択" subtitle={`${findFacility(animal.facilityId).name}の${animal.name}`} onBack={onBack} />
-      <div className="px-4 mt-6">
-        <SurfaceCard className="flex items-center gap-4 mb-8 p-5">
-          <div className="w-20 shrink-0"><ArtCanvas animal={animal} label={animal.name} compact /></div>
-          <div><div className="text-base font-black text-[#11284f]">{animal.name}を応援</div><div className="text-[11px] text-slate-500 mt-1">あなたの支援が暮らしを支えます</div></div>
-        </SurfaceCard>
-        <div className="grid gap-4">
-          {supportPlans.map((plan, idx) => (
-            <motion.button 
-              key={plan.id} 
-              onClick={() => onSelectPlan(plan.id)} 
-              className={classNames("rounded-[28px] border p-6 text-left transition relative overflow-hidden", plan.id === selectedPlanId ? "border-[#1656d9] bg-[#eff5ff] shadow-md" : "border-slate-200 bg-white shadow-sm")}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex justify-between items-start relative z-10">
-                <div><div className="text-xl font-black text-[#11284f]">{plan.label}</div><div className="text-base font-black text-[#173e72] mt-1">{plan.title}</div><div className="text-[12px] text-slate-500 mt-3 leading-relaxed">{plan.perks}</div></div>
-                {plan.recommended && <div className="rounded-full bg-[#1656d9] px-3 py-1 text-[10px] font-black text-white shadow-sm">おすすめ</div>}
-              </div>
-            </motion.button>
-          ))}
-        </div>
-        <motion.button 
-          onClick={onConfirm} 
-          className="mt-10 w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white shadow-2xl transition"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          応援を確定する
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-}
-
-function SupportSuccessScreen({ animal, onTabSelect }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="h-full bg-white flex flex-col items-center justify-center px-10 text-center"
-    >
-      <motion.div 
-        className="h-24 w-24 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-8 shadow-inner"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", damping: 10 }}
-      >
-        <CheckCircle2 className="h-12 w-12" />
-      </motion.div>
-      <motion.div 
-        className="text-3xl font-black text-[#10233c] mb-4 tracking-tight"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        応援が完了しました！
-      </motion.div>
-      <motion.p 
-        className="text-sm text-slate-500 leading-relaxed mb-12"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        {findFacility(animal.facilityId).name}の{animal.name}のサポーターになりました。
-      </motion.p>
-      <motion.button 
-        onClick={() => onTabSelect("home")} 
-        className="w-full rounded-[22px] bg-[#1656d9] py-5 text-base font-black text-white mb-4 shadow-xl transition"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        ホームに戻る
-      </motion.button>
-      <motion.button 
-        onClick={() => onTabSelect("reports")} 
-        className="w-full rounded-[22px] border-2 border-slate-100 py-5 text-base font-black text-slate-500 transition"
-        whileHover={{ scale: 1.02, backgroundColor: "rgba(0,0,0,0.02)" }}
-        whileTap={{ scale: 0.98 }}
-      >
-        レポートを見る
-      </motion.button>
-    </motion.div>
-  );
-}
-
-// --- メインアプリケーション ---
-function App() {
-  const [stack, setStack] = React.useState(["home"]);
-  const [searchStep, setSearchStep] = React.useState("category");
-  const [searchCategory, setSearchCategory] = React.useState(null);
-  const [searchFacilityId, setSearchFacilityId] = React.useState(null);
-  const [selectedAnimalId, setSelectedAnimalId] = React.useState("penguin-1");
-  const [followedIds, setFollowedIds] = React.useState(["penguin-1", "otter-1"]);
-  const [supportedIds, setSupportedIds] = React.useState(["penguin-1"]);
-  const [selectedPlanId, setSelectedPlanId] = React.useState("starter");
-
-  const push = (s) => setStack(c => [...c, s]);
-  const pop = () => setStack(c => c.slice(0, -1));
-  const reset = (s) => { setStack([s]); setSearchStep("category"); setSearchCategory(null); setSearchFacilityId(null); }
-
-  const current = stack[stack.length - 1];
-  const animal = findAnimal(selectedAnimalId);
-  const followedAnimals = followedIds.map(findAnimal).filter(Boolean);
-  const supportedAnimals = supportedIds.map(findAnimal).filter(Boolean);
-
-  let screen = null;
-  if (current === "home") screen = <HomeScreen selectedAnimal={animal} onSelectAnimal={(id) => { setSelectedAnimalId(id); push("detail"); }} onTabSelect={reset} />;
-  else if (current === "discover") screen = <DiscoverScreen step={searchStep} category={searchCategory} facilityId={searchFacilityId} onSelectCategory={(c) => { setSearchCategory(c); setSearchStep("facility"); }} onSelectFacility={(id) => { setSearchFacilityId(id); setSearchStep("animal"); }} onSelectAnimal={(id) => { setSelectedAnimalId(id); push("detail"); }} onTabSelect={reset} onBack={() => { if (searchStep === "animal") setSearchStep("facility"); else if (searchStep === "facility") setSearchStep("category"); else reset("home"); }} />;
-  else if (current === "reports") screen = <ReportsScreen onTabSelect={reset} />;
-  else if (current === "member") screen = <MemberScreen supportedAnimalId={supportedIds[0]} onTabSelect={reset} />;
-  else if (current === "mypage") screen = <MyPageScreen followedAnimals={followedAnimals} supportedAnimals={supportedAnimals} onSelectAnimal={(id) => { setSelectedAnimalId(id); push("detail"); }} onTabSelect={reset} />;
-  else if (current === "detail") screen = <DetailScreen animal={animal} followed={followedIds.includes(selectedAnimalId)} onToggleFollow={() => setFollowedIds(prev => prev.includes(selectedAnimalId) ? prev.filter(i => i !== selectedAnimalId) : [...prev, selectedAnimalId])} onOpenSupport={() => push("support")} onBack={pop} />;
-  else if (current === "support") screen = <SupportScreen animal={animal} selectedPlanId={selectedPlanId} onSelectPlan={setSelectedPlanId} onBack={pop} onConfirm={() => { setSupportedIds(prev => [...new Set([...prev, selectedAnimalId])]); push("support-success"); }} />;
-  else if (current === "support-success") screen = <SupportSuccessScreen animal={animal} onTabSelect={reset} />;
-
-  return (
-    <div className="min-h-screen flex items-center justify-center py-10">
-      <PhoneFrame>
-        <AnimatePresence mode="wait">
-          {screen}
-        </AnimatePresence>
-      </PhoneFrame>
+      <div class="numbers"><div class="numcard reveal"><b>BUSINESS AREAS</b><strong>3</strong><span>園館DX / 企業・地域共創 / 生き物人材</span></div><div class="numcard reveal"><b>APPROACH</b><strong>4</strong><span>企画・技術・デザイン・現場実装を横断</span></div><div class="numcard reveal"><b>CORE</b><strong>BIO</strong><span>動物・自然への理解を土台に事業化</span></div><div class="numcard reveal"><b>STYLE</b><strong>FAST</strong><span>PoCを回しながら、小さく速く進める</span></div></div>
     </div>
-  );
-}
+  </section>
 
-createRoot(document.getElementById("root")).render(<App />);
-    </script>
-  </body>
+  <section class="section founder">
+    <div class="wrap founder-grid">
+      <div class="portrait reveal"><svg viewBox="0 0 520 700" aria-hidden="true"><circle cx="264" cy="182" r="112" fill="#0D1614"/><path d="M146 690c8-167 67-270 118-292 53 22 114 125 120 292H146Z" fill="#0D1614"/><path d="M196 153c14-55 48-92 92-98 48 13 82 53 88 103-32-9-64-25-92-50-19 25-43 40-88 45Z" fill="#FFFFFF" opacity=".92"/></svg></div>
+      <div class="reveal"><div class="tiny">04 / Founder</div><h2>「生き物が好き」が、<br>仕事として報われる社会へ。</h2><p class="lead">動物学を起点に、地域・教育・スタートアップ・テクノロジーを横断。生き物に関わる価値を、持続可能な事業として社会へ実装していきます。</p><div class="founder-name">堀内 涼太郎</div><div class="founder-role">Founder / CEO, Aqzoo Inc.</div><div class="founder-tags"><span class="chip">Animal Science</span><span class="chip">Nature Positive</span><span class="chip">Startup</span><span class="chip">Creative Direction</span></div></div>
+    </div>
+  </section>
+
+  <section id="company" class="section">
+    <div class="wrap">
+      <div class="section-head reveal"><div><div class="tiny">05 / Company</div></div><div><h2>Company Profile</h2></div></div>
+      <div class="company-grid"><article class="company-card reveal"><h3>Profile</h3><dl class="profile"><div class="row"><dt>会社名</dt><dd>株式会社Aqzoo</dd></div><div class="row"><dt>代表</dt><dd>代表取締役 堀内 涼太郎</dd></div><div class="row"><dt>設立</dt><dd>2025年8月</dd></div><div class="row"><dt>所在地</dt><dd>岡山市北区津島中3-1-1<br>岡山大学 共創イノベーションラボ</dd></div></dl></article><article class="company-card mission reveal"><h3>Mission</h3><div class="big">すべての生き物好きに、<br>もっと幸せな毎日を。</div><p>施設の収益多様化、働く人の価値向上、動物福祉・教育価値の拡張。生き物を中心に、人と自然の関係をアップデートします。</p></article></div>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <div class="wrap"><div class="contact-card reveal"><span class="sticker pink">LET'S COLLABORATE</span><h2 style="margin-top:18px;">生き物に関わる、<br>次の価値を一緒につくる。</h2><p>動物園・水族館、企業、自治体、教育機関、研究機関との共同プロジェクト、PoC、企画開発、事業共創のご相談を歓迎しています。</p><div class="btns" style="justify-content:center;"><a class="btn dark" href="#company" onclick="alert('お問い合わせ先（メール・フォームURL）を設定してください。'); return false;">お問い合わせ</a><a class="btn" href="#top">TOPへ戻る</a></div><div class="contact-icons"><div class="bubble"><svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path fill="#8AB9FF" d="M10 35c7-10 18-16 31-16 10 0 18 4 24 10-4 3-8 8-10 13-5 4-13 7-21 7-10 0-17-3-22-6-2 2-5 4-9 6 0-6 2-10 7-14Z"/></svg></div><div class="bubble"><svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path fill="#D9FF57" d="M51 13C26 14 12 29 12 45c0 10 7 18 16 18 16 0 29-20 30-50Z"/><path d="M23 50c10-9 18-15 29-24" stroke="#0D1614" stroke-width="3.8" stroke-linecap="round"/></svg></div><div class="bubble"><svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path fill="#89EFE4" d="M18 32c0-10 7-18 14-18s14 8 14 18c0 4-1 8-4 11H22c-3-3-4-7-4-11Z"/><path d="M24 43c1 4 1 7 2 11m8-11v13m7-13c1 4 2 7 4 10" stroke="#0D1614" stroke-width="3.6" stroke-linecap="round"/></svg></div></div></div></div>
+  </section>
+</main>
+<footer><div class="wrap footer-grid"><div class="footer-brand"><span class="logo-mark"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 13c3-4 8-6 12-6 3 0 5 1 7 3-2 2-3 5-6 7-3 2-7 3-11 2 1-1 2-3 2-6 0 2-2 4-4 5-1-1-1-3 0-5Z"/></svg></span><div><b>AQZOO</b><div style="font-size:12px;color:var(--muted);margin-top:4px;">Nature is an asset.</div></div></div><div class="footer-meta">© 2026 Aqzoo Inc.<br>Bio Creative Company</div></div></footer>
+<script>const io = new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('show');io.unobserve(entry.target);}})},{threshold:0.12});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));</script>
+</body>
 </html>
